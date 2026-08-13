@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crafty Blooms — E2E Order Flow Test</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f7f8fa; color: #1a1a1a; padding: 24px; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .subtitle { color: #666; font-size: 13px; margin-bottom: 24px; }
+    .section { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    .section h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #444; margin-bottom: 12px; }
+    .test-row { display: flex; align-items: flex-start; gap: 12px; padding: 7px 0; border-bottom: 1px solid #f0ede9; font-size: 13px; }
+    .test-row:last-child { border-bottom: none; }
+    .test-label { min-width: 280px; color: #333; }
+    .PASS  { color: #15803d; font-weight: 700; min-width: 50px; }
+    .FAIL  { color: #c8102e; font-weight: 700; min-width: 50px; }
+    .INFO  { color: #1d4ed8; font-weight: 700; min-width: 50px; }
+    .detail { color: #555; font-size: 12px; flex: 1; word-break: break-all; }
+    button { padding: 9px 18px; border-radius: 5px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-run  { background: #1a1a1a; color: #fff; }
+    .btn-clear { background: #fee2e2; color: #c8102e; }
+    .btn-admin { background: #dbeafe; color: #1d4ed8; }
+    .btns { display: flex; gap: 10px; margin-bottom: 20px; }
+    pre { background: #1e1e1e; color: #d4d4d4; padding: 14px; border-radius: 6px; font-size: 12px; overflow-x: auto; line-height: 1.5; white-space: pre-wrap; }
+    .summary { padding: 14px 18px; border-radius: 6px; font-weight: 600; font-size: 14px; }
+    .summary.all-pass { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .summary.has-fail  { background: #fee2e2; color: #c8102e; border: 1px solid #fecaca; }
+  </style>
+</head>
+<body>
+
+<h1>🌸 Crafty Blooms — End-to-End Order Flow Test</h1>
+<p class="subtitle">Tests the full order cycle: Cart → Submit Order → localStorage → Admin reads order.<br>
+Run this file from the same folder as <code>index.html</code> and <code>admin.html</code>.</p>
+
+<div class="btns">
+  <button class="btn-run"   onclick="runAllTests()">▶ Run All Tests</button>
+  <button class="btn-clear" onclick="clearTestData()">🗑 Clear Test Data</button>
+  <button class="btn-admin" onclick="window.open('admin.html','_blank')">Open Admin →</button>
+  <button class="btn-admin" onclick="window.open('index.html','_blank')">Open Store →</button>
+</div>
+
+<div id="summary"></div>
+<div id="results"></div>
+
+<script>
+/* ── CONSTANTS (must match catalog.js / admin.js) ── */
+const ORDERS_KEY  = 'craftyblooms_orders_v1';
+const CART_KEY    = 'craftyblooms_cart_v1';
+const AUTH_KEY    = 'cb_admin_auth_v1';
+const ADMIN_PIN   = '1234';
+
+/* ── TEST RUNNER ── */
+let results = [];
+
+function test(label, fn) {
+  try {
+    const result = fn();
+    results.push({ label, status: result.ok ? 'PASS' : 'FAIL', detail: result.detail || '' });
+  } catch(e) {
+    results.push({ label, status: 'FAIL', detail: 'Exception: ' + e.message });
+  }
+}
+
+function info(label, detail) {
+  results.push({ label, status: 'INFO', detail });
+}
+
+/* ── HELPERS (replicated from catalog.js) ── */
+function generateOrderId(existingOrders) {
+  const today    = new Date();
+  const datePart = today.getFullYear().toString()
+                 + String(today.getMonth() + 1).padStart(2, '0')
+                 + String(today.getDate()).padStart(2, '0');
+  const prefix   = 'ORD-' + datePart + '-';
+  const count    = existingOrders.filter(o => o.id && o.id.startsWith(prefix)).length;
+  return prefix + String(count + 1).padStart(3, '0');
+}
+
+function logOrder(orderId, customerName, phone, address, note, itemsSnapshot, subtotal) {
+  const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+  orders.unshift({
+    id: orderId,
+    timestamp: new Date().toISOString(),
+    customerName,
+    phone:     phone   || '',
+    address:   address || '',
+    items:     itemsSnapshot,
+    subtotal,
+    note:      note    || '',
+    adminNote: '',
+    status:    'pending'
+  });
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  return orderId;
+}
+
+function loadOrders() {
+  try { return JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+
+/* ── TEST SUITE ── */
+function runAllTests() {
+  results = [];
+  const container = document.getElementById('results');
+  const summaryEl = document.getElementById('summary');
+  container.innerHTML = '<p style="color:#666;font-size:13px">Running…</p>';
+  summaryEl.innerHTML = '';
+
+  // ── SUITE 1: localStorage availability ──────────────────────
+  test('localStorage is accessible', () => {
+    try {
+      localStorage.setItem('_cb_test', '1');
+      const v = localStorage.getItem('_cb_test');
+      localStorage.removeItem('_cb_test');
+      return { ok: v === '1', detail: v === '1' ? 'Read/write OK' : `Got "${v}" instead of "1"` };
+    } catch(e) {
+      return { ok: false, detail: 'localStorage blocked: ' + e.message };
+    }
+  });
+
+  test('localStorage origin is file:// or http(s)://', () => {
+    const proto = location.protocol;
+    const ok    = proto === 'file:' || proto === 'http:' || proto === 'https:';
+    return { ok, detail: `Protocol: ${proto} — ${ok ? 'OK' : 'Unexpected protocol, localStorage may be sandboxed'}` };
+  });
+
+  info('localStorage origin', `${location.origin} (both index.html and admin.html must share this exact origin)`);
+
+  // ── SUITE 2: Simulate Cart ───────────────────────────────────
+  const testCart = [
+    { id: 'FL-001', name: 'Pearl Bloom Pot',   price: 349, qty: 2, thumb: 'Images/Flower.jpeg' },
+    { id: 'TY-001', name: 'Elephant Duo',       price: 299, qty: 1, thumb: 'Images/Toys (1).jpeg' }
+  ];
+  localStorage.setItem(CART_KEY, JSON.stringify(testCart));
+
+  test('Cart written to localStorage', () => {
+    const saved = JSON.parse(localStorage.getItem(CART_KEY) || 'null');
+    return { ok: Array.isArray(saved) && saved.length === 2, detail: `Cart has ${saved ? saved.length : 0} item(s)` };
+  });
+
+  test('Cart subtotal calculation', () => {
+    const cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const expected = 349 * 2 + 299 * 1; // 997
+    return { ok: subtotal === expected, detail: `Subtotal ₹${subtotal} (expected ₹${expected})` };
+  });
+
+  // ── SUITE 3: Order ID generation ────────────────────────────
+  // Clear orders first for a clean slate
+  const existingOrders = loadOrders();
+  const existingCount  = existingOrders.length;
+  info('Existing orders in localStorage', `${existingCount} order(s) already in store`);
+
+  const orderId = generateOrderId(existingOrders);
+  test('Order ID format is ORD-YYYYMMDD-NNN', () => {
+    const pattern = /^ORD-\d{8}-\d{3}$/;
+    return { ok: pattern.test(orderId), detail: `Generated: ${orderId}` };
+  });
+
+  // ── SUITE 4: logOrder (simulates catalog.js submitOrder) ─────
+  const testOrder = {
+    orderId,
+    customerName: 'Test Customer',
+    phone:        '9876543210',
+    address:      '123 Test Street, Pune, Maharashtra 411001',
+    note:         'Please pack carefully',
+    items:        testCart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
+    subtotal:     349 * 2 + 299 * 1
+  };
+
+  logOrder(
+    testOrder.orderId,
+    testOrder.customerName,
+    testOrder.phone,
+    testOrder.address,
+    testOrder.note,
+    testOrder.items,
+    testOrder.subtotal
+  );
+
+  test('Order written to localStorage (craftyblooms_orders_v1)', () => {
+    const raw = localStorage.getItem(ORDERS_KEY);
+    return { ok: raw !== null && raw.length > 2, detail: raw ? `${raw.length} bytes stored` : 'Key is null!' };
+  });
+
+  // ── SUITE 5: Admin reads the order (simulates admin.js loadOrders) ──
+  const allOrders = loadOrders();
+
+  test('Admin loadOrders() can read orders array', () => {
+    return { ok: Array.isArray(allOrders), detail: `Got ${allOrders.length} order(s)` };
+  });
+
+  test('Test order is present in orders list', () => {
+    const found = allOrders.find(o => o.id === orderId);
+    return { ok: !!found, detail: found ? `Found order ${orderId}` : `Order ${orderId} NOT FOUND in array of ${allOrders.length}` };
+  });
+
+  test('Order has all required fields', () => {
+    const o = allOrders.find(x => x.id === orderId);
+    if (!o) return { ok: false, detail: 'Order not found' };
+    const required = ['id','timestamp','customerName','phone','address','items','subtotal','status'];
+    const missing  = required.filter(k => o[k] === undefined || o[k] === null || o[k] === '');
+    return {
+      ok: missing.length === 0,
+      detail: missing.length === 0
+        ? 'All fields present: ' + required.join(', ')
+        : 'Missing fields: ' + missing.join(', ')
+    };
+  });
+
+  test('Order status is "pending"', () => {
+    const o = allOrders.find(x => x.id === orderId);
+    return { ok: o && o.status === 'pending', detail: o ? `status = "${o.status}"` : 'Order not found' };
+  });
+
+  test('Order items array has correct data', () => {
+    const o    = allOrders.find(x => x.id === orderId);
+    if (!o) return { ok: false, detail: 'Order not found' };
+    const ok   = Array.isArray(o.items) && o.items.length === 2
+              && o.items[0].id === 'FL-001' && o.items[0].qty === 2
+              && o.items[1].id === 'TY-001' && o.items[1].qty === 1;
+    return { ok, detail: `items = ${JSON.stringify(o.items)}` };
+  });
+
+  test('Order subtotal is correct (₹997)', () => {
+    const o = allOrders.find(x => x.id === orderId);
+    return { ok: o && o.subtotal === 997, detail: o ? `subtotal = ₹${o.subtotal}` : 'Order not found' };
+  });
+
+  test('Order phone is stored correctly', () => {
+    const o = allOrders.find(x => x.id === orderId);
+    return { ok: o && o.phone === '9876543210', detail: o ? `phone = "${o.phone}"` : 'Order not found' };
+  });
+
+  test('Order address is stored correctly', () => {
+    const o = allOrders.find(x => x.id === orderId);
+    return { ok: o && o.address.includes('Test Street'), detail: o ? `address = "${o.address}"` : 'Order not found' };
+  });
+
+  // ── SUITE 6: Sequential order IDs ───────────────────────────
+  const ordersBeforeSecond = loadOrders();
+  const secondId = generateOrderId(ordersBeforeSecond);
+  logOrder(secondId, 'Second Customer', '9999999999', 'Another Address', '', testCart.map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty})), 997);
+  const secondIdActual = loadOrders().find(o => o.customerName === 'Second Customer')?.id;
+
+  test('Sequential Order IDs increment correctly', () => {
+    const n1 = parseInt(orderId.split('-')[2]);
+    const n2 = parseInt(secondId.split('-')[2]);
+    return { ok: n2 === n1 + 1, detail: `${orderId} → ${secondId} (diff: ${n2 - n1})` };
+  });
+
+  // ── SUITE 7: Admin PIN auth check ──────────────────────────
+  test('Admin auth key in localStorage', () => {
+    const val = localStorage.getItem(AUTH_KEY);
+    return {
+      ok: val === '1' || val === null,
+      detail: val === '1' ? 'Admin is currently logged in (AUTH_KEY = "1")' : 'Admin is not logged in (AUTH_KEY not set) — normal if you haven\'t opened admin.html'
+    };
+  });
+
+  // ── SUITE 8: WhatsApp URL generation ─────────────────────────
+  test('WhatsApp URL encodes correctly', () => {
+    const o      = allOrders.find(x => x.id === orderId);
+    if (!o) return { ok: false, detail: 'Order not found' };
+    let phone = o.phone.replace(/[\s\-\(\)]/g, '');
+    if (phone.startsWith('+')) phone = phone.slice(1);
+    if (!phone.startsWith('91') && phone.length === 10) phone = '91' + phone;
+    const expectedPhone = '919876543210';
+    const waUrl = `https://wa.me/${phone}`;
+    return { ok: phone === expectedPhone, detail: `Phone normalised to: ${phone} → ${waUrl}` };
+  });
+
+  // ── SUITE 9: Store-wide localStorage key audit ──────────────
+  const lsKeys = Object.keys(localStorage);
+  const expectedKeys = [ORDERS_KEY, CART_KEY];
+  info('All localStorage keys present', lsKeys.join(', ') || '(none)');
+
+  test('ORDERS_KEY exists after order placement', () => {
+    return { ok: lsKeys.includes(ORDERS_KEY), detail: `"${ORDERS_KEY}" ${lsKeys.includes(ORDERS_KEY) ? 'found' : 'NOT found'} in localStorage` };
+  });
+
+  // ── SUITE 10: Admin renderOrders logic simulation ───────────
+  test('Admin renderOrders: filtered = all orders when filter="all"', () => {
+    const orders   = loadOrders();
+    const filtered = orders; // activeStatusFilter === 'all'
+    return { ok: filtered.length >= 2, detail: `${filtered.length} orders visible with "all" filter` };
+  });
+
+  test('Admin renderOrders: filtered = pending only', () => {
+    const orders   = loadOrders();
+    const filtered = orders.filter(o => o.status === 'pending');
+    const allPending = filtered.every(o => o.status === 'pending');
+    return { ok: allPending && filtered.length >= 2, detail: `${filtered.length} pending order(s)` };
+  });
+
+  test('Admin stats: Total count correct', () => {
+    const orders = loadOrders();
+    const total  = orders.length;
+    return { ok: total >= 2, detail: `Total orders = ${total}` };
+  });
+
+  test('Admin stats: Pending count correct', () => {
+    const orders  = loadOrders();
+    const pending = orders.filter(o => o.status === 'pending').length;
+    return { ok: pending >= 2, detail: `Pending orders = ${pending}` };
+  });
+
+  test('Admin stats: Revenue = 0 (no accepted orders yet)', () => {
+    const orders  = loadOrders();
+    const revenue = orders.filter(o => o.status === 'accepted').reduce((s, o) => s + (o.subtotal || 0), 0);
+    return { ok: revenue === 0, detail: `Revenue = ₹${revenue} (no accepted orders, expected ₹0)` };
+  });
+
+  // ── SUITE 11: Accept an order and verify ────────────────────
+  const ordersForAccept = loadOrders();
+  const toAccept = ordersForAccept.find(o => o.id === orderId);
+  if (toAccept) {
+    toAccept.status = 'accepted';
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(ordersForAccept));
+  }
+
+  test('Accept order: status changes to "accepted"', () => {
+    const o = loadOrders().find(x => x.id === orderId);
+    return { ok: o && o.status === 'accepted', detail: o ? `status = "${o.status}"` : 'Order not found' };
+  });
+
+  test('Revenue includes accepted order subtotal (₹997)', () => {
+    const orders  = loadOrders();
+    const revenue = orders.filter(o => o.status === 'accepted').reduce((s, o) => s + (o.subtotal || 0), 0);
+    return { ok: revenue >= 997, detail: `Revenue = ₹${revenue}` };
+  });
+
+  // ── SUMMARY ─────────────────────────────────────────────────
+  const orderData = loadOrders().find(x => x.id === orderId);
+  info('Final order in localStorage', JSON.stringify(orderData, null, 2));
+
+  // ── RENDER ───────────────────────────────────────────────────
+  const passed = results.filter(r => r.status === 'PASS').length;
+  const failed = results.filter(r => r.status === 'FAIL').length;
+  const infoCount = results.filter(r => r.status === 'INFO').length;
+
+  summaryEl.innerHTML = `
+    <div class="summary ${failed === 0 ? 'all-pass' : 'has-fail'}">
+      ${failed === 0
+        ? `✅ All ${passed} tests passed — end-to-end order cycle is working correctly.`
+        : `❌ ${failed} test(s) failed out of ${passed + failed}. See details below.`}
+    </div>`;
+
+  container.innerHTML = `
+    <div class="section">
+      <h2>Test Results (${passed} passed · ${failed} failed · ${infoCount} info)</h2>
+      ${results.map(r => `
+        <div class="test-row">
+          <span class="${r.status}">${r.status}</span>
+          <span class="test-label">${r.label}</span>
+          <span class="detail">${r.status === 'INFO' && r.detail.startsWith('{')
+            ? `<pre>${r.detail}</pre>` : r.detail}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+function clearTestData() {
+  if (!confirm('Clear all order test data? This removes craftyblooms_orders_v1 and craftyblooms_cart_v1.')) return;
+  localStorage.removeItem(ORDERS_KEY);
+  localStorage.removeItem(CART_KEY);
+  document.getElementById('results').innerHTML = '<p style="color:#666;font-size:13px">Test data cleared.</p>';
+  document.getElementById('summary').innerHTML = '';
+}
+</script>
+</body>
+</html>

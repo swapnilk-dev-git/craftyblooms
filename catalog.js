@@ -385,8 +385,14 @@ function submitOrder() {
   if (note) msg += `\n\uD83D\uDCDD Note: ${note}`;
   msg += `\n\nPlease confirm availability and share payment details. Thank you!`;
 
-  // Log BEFORE clearing cart
-  logOrder(orderId, name, phone, address, note, snapshot, subtotal);
+  // Log BEFORE clearing cart — if this throws (e.g. localStorage full/blocked), abort with error
+  try {
+    logOrder(orderId, name, phone, address, note, snapshot, subtotal);
+  } catch(e) {
+    console.error('Order logging failed:', e);
+    if (typeof showToast === 'function') showToast('⚠ Could not save order — please screenshot your cart and contact us on WhatsApp!');
+    return;
+  }
 
   window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
 
@@ -397,22 +403,20 @@ function submitOrder() {
 }
 
 function logOrder(orderId, customerName, phone, address, note, itemsSnapshot, subtotal) {
-  try {
-    const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
-    orders.unshift({
-      id: orderId,
-      timestamp: new Date().toISOString(),
-      customerName,
-      phone:     phone   || '',
-      address:   address || '',
-      items:     itemsSnapshot,
-      subtotal,
-      note:      note    || '',
-      adminNote: '',
-      status:    'pending'
-    });
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-  } catch(e) { console.warn('Order logging failed:', e); }
+  const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+  orders.unshift({
+    id: orderId,
+    timestamp: new Date().toISOString(),
+    customerName,
+    phone:     phone   || '',
+    address:   address || '',
+    items:     itemsSnapshot,
+    subtotal,
+    note:      note    || '',
+    adminNote: '',
+    status:    'pending'
+  });
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 }
 
 // ── 6. STATE ─────────────────────────────────────────────────

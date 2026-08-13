@@ -81,15 +81,30 @@ function init() {
   startOrderPoller();
 }
 
+function refreshDashboard() {
+  renderStats();
+  renderOrders();
+  _lastSeenOrderCount = loadOrders().filter(o => o.status === 'pending').length;
+  showToast('🔄 Refreshed');
+}
+
 // ── NEW ORDER NOTIFICATION (polling localStorage every 10s) ────
 let _pollerTimer = null;
 
 function startOrderPoller() {
   if (_pollerTimer) clearInterval(_pollerTimer);
   _pollerTimer = setInterval(checkForNewOrders, 10000);
-  // Also listen for storage events (same tab write from catalog.js)
+  // Also listen for storage events (cross-tab, same browser)
   window.addEventListener('storage', e => {
     if (e.key === ORDERS_KEY) checkForNewOrders();
+  });
+  // Refresh whenever admin tab regains focus (e.g. user placed order in another tab)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      renderStats();
+      renderOrders();
+      checkForNewOrders();
+    }
   });
 }
 

@@ -48,6 +48,7 @@
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="14" height="14"><path d="M14.7 3.3a1 1 0 011.4 1.4L6.4 14.5l-2.8.7.7-2.8L14.7 3.3z"/></svg>
           Edit Store
         </a>
+        <button class="adm-btn adm-btn--ghost" onclick="refreshDashboard()">🔄 Refresh</button>
         <button class="adm-btn adm-btn--ghost" onclick="exportCSV()">⬇ Export CSV</button>
         <button class="adm-btn adm-btn--danger" onclick="logout()">Logout</button>
       </div>
@@ -98,6 +99,7 @@
       <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.2" width="48" height="48" opacity="0.25"><rect x="10" y="6" width="40" height="48" rx="3"/><path d="M18 18h24M18 26h24M18 34h16"/></svg>
       <p>No orders yet</p>
       <span>Orders placed from the store will appear here.</span>
+      <span style="font-size:11px;color:#a0a0a0;margin-top:6px;">Expecting an order? Try clicking <strong>🔄 Refresh</strong> above.<br>Orders only sync when the store and admin are open in the <strong>same browser</strong> on the same device.</span>
     </div>
     <div id="orders-list" class="orders-list"></div>
   </main>
