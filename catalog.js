@@ -96,6 +96,19 @@ let products = loadProducts();
 const CART_KEY   = 'craftyblooms_cart_v1';
 const ORDERS_KEY = 'craftyblooms_orders_v1';
 
+// ── GOOGLE SHEETS BACKEND ─────────────────────────────────────
+// Paste your Apps Script Web App URL here after deploying Code.gs.
+// Leave empty ('') to disable Sheet sync (localStorage-only mode).
+const GAS_URL = '';
+
+function postOrderToSheet(order) {
+  if (!GAS_URL) return; // Sheet sync disabled
+  fetch(GAS_URL, {
+    method: 'POST',
+    body:   JSON.stringify({ action: 'create_order', order })
+  }).catch(function() {}); // fire-and-forget — never block the UI
+}
+
 function loadCart() {
   try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
   catch(e) { return []; }
@@ -394,6 +407,13 @@ function submitOrder() {
     if (typeof showToast === 'function') showToast('⚠ Could not save order — please screenshot your cart and contact us on WhatsApp!');
     return;
   }
+
+  // Sync to Google Sheet (fire-and-forget — never blocks WhatsApp open)
+  postOrderToSheet({
+    id: orderId, timestamp: new Date().toISOString(),
+    customerName: name, phone, address,
+    items: snapshot, subtotal, note, adminNote: '', status: 'pending'
+  });
 
   window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
 

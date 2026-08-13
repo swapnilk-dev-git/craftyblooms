@@ -1,6 +1,6 @@
 /* ============================================================
    Crafty Blooms — Admin Dashboard JS
-   PIN-protected · localStorage-based order management
+   PIN-protected · Google Sheets + localStorage order management
    ============================================================ */
 
 const ADMIN_PIN   = '1234'; // Change this to your preferred PIN
@@ -9,6 +9,11 @@ const ORDERS_KEY  = 'craftyblooms_orders_v1';
 const LOCKOUT_KEY = 'cb_admin_lockout_v1'; // { attempts: n, lockedUntil: ms }
 const MAX_ATTEMPTS  = 3;
 const LOCKOUT_MS    = 5 * 60 * 1000; // 5 minutes
+
+// ── GOOGLE SHEETS BACKEND ─────────────────────────────────────
+// Paste your Apps Script Web App URL here (same URL as in catalog.js).
+// Leave empty ('') to run in localStorage-only mode.
+const GAS_URL = '';
 
 // ── 1. AUTH ───────────────────────────────────────────────────
 
@@ -79,16 +84,76 @@ function init() {
   renderOrders();
   _lastSeenOrderCount = loadOrders().filter(o => o.status === 'pending').length;
   startOrderPoller();
+  syncFromSheet(); // kick off an immediate Sheet fetch on load
 }
 
 function refreshDashboard() {
-  renderStats();
-  renderOrders();
-  _lastSeenOrderCount = loadOrders().filter(o => o.status === 'pending').length;
-  showToast('🔄 Refreshed');
+  syncFromSheet();
+  showToast('🔄 Refreshing…');
 }
 
-// ── NEW ORDER NOTIFICATION (polling localStorage every 10s) ────
+// ── GOOGLE SHEETS SYNC ────────────────────────────────────────
+
+// Fetch all orders from the Sheet and merge into localStorage.
+// Sheet is authoritative for status + adminNote; localStorage holds
+// the full order structure (items, subtotal, etc.).
+function syncFromSheet() {
+  if (!GAS_URL) return;
+  fetch(GAS_URL)
+    .then(r => r.json())
+    .then(res => {
+      if (!res.ok || !Array.isArray(res.data)) return;
+      const sheetOrders  = res.data;
+      const localOrders  = loadOrders();
+
+      // Build a map of local orders by id for fast lookup
+      const localMap = {};
+      localOrders.forEach(o => { localMap[o.id] = o; });
+
+      // Merge: for each Sheet order, update or insert into local map
+      sheetOrders.forEach(so => {
+        if (localMap[so.id]) {
+          // Sheet wins on status and adminNote; keep full local structure
+          localMap[so.id].status    = so.status;
+          localMap[so.id].adminNote = so.adminNote;
+        } else {
+          // New order from Sheet (placed on another device) — add fully
+          localMap[so.id] = so;
+        }
+      });
+
+      // Rebuild array, newest first (sort by timestamp desc)
+      const merged = Object.values(localMap)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      saveOrders(merged);
+      renderStats();
+      renderOrders();
+      checkForNewOrders();
+    })
+    .catch(() => {}); // silent — localStorage render already shown
+}
+
+// Patch a single field on a Sheet row (fire-and-forget)
+function patchOrderInSheet(id, patch) {
+  if (!GAS_URL) return;
+  const action = patch.adminNote !== undefined ? 'update_note' : 'update_status';
+  fetch(GAS_URL, {
+    method: 'POST',
+    body:   JSON.stringify({ action, id, ...patch })
+  }).catch(() => {});
+}
+
+// Delete a row in the Sheet (fire-and-forget)
+function deleteOrderInSheet(id) {
+  if (!GAS_URL) return;
+  fetch(GAS_URL, {
+    method: 'POST',
+    body:   JSON.stringify({ action: 'delete_order', id })
+  }).catch(() => {});
+}
+
+// ── NEW ORDER NOTIFICATION (polling every 10s) ────────────────
 let _pollerTimer = null;
 
 function startOrderPoller() {
@@ -98,13 +163,9 @@ function startOrderPoller() {
   window.addEventListener('storage', e => {
     if (e.key === ORDERS_KEY) checkForNewOrders();
   });
-  // Refresh whenever admin tab regains focus (e.g. user placed order in another tab)
+  // Full Sheet sync whenever admin tab regains focus
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      renderStats();
-      renderOrders();
-      checkForNewOrders();
-    }
+    if (document.visibilityState === 'visible') syncFromSheet();
   });
 }
 
@@ -114,7 +175,6 @@ function checkForNewOrders() {
     const newCount = pending - _lastSeenOrderCount;
     showNewOrderBadge(pending);
     showToast(`🛒 ${newCount} new order${newCount > 1 ? 's' : ''} received!`);
-    // Browser notification if permitted
     if (Notification && Notification.permission === 'granted') {
       new Notification('Crafty Blooms — New Order!', {
         body: `${newCount} new order${newCount > 1 ? 's' : ''} waiting. Open admin dashboard.`,
@@ -125,6 +185,8 @@ function checkForNewOrders() {
     renderOrders();
   }
   _lastSeenOrderCount = pending;
+  // Also kick off a Sheet sync on every poll tick
+  syncFromSheet();
 }
 
 function showNewOrderBadge(count) {
@@ -303,10 +365,10 @@ function acceptOrder(id) {
   if (!o) return;
   o.status = 'accepted';
   saveOrders(orders);
+  patchOrderInSheet(id, { status: 'accepted' });
   renderStats();
   renderOrders();
   showToast('✅ Order accepted');
-  // Prompt admin to send WA confirmation if customer has a phone number
   if (o.phone) {
     setTimeout(() => {
       if (confirm(`Order accepted! Send WhatsApp confirmation to ${o.customerName} (${o.phone})?`)) {
@@ -322,10 +384,10 @@ function rejectOrder(id) {
   if (!o) return;
   o.status = 'rejected';
   saveOrders(orders);
+  patchOrderInSheet(id, { status: 'rejected' });
   renderStats();
   renderOrders();
   showToast('❌ Order rejected');
-  // Prompt admin to send WA rejection notice if customer has a phone number
   if (o.phone) {
     setTimeout(() => {
       if (confirm(`Order rejected. Send WhatsApp notice to ${o.customerName} (${o.phone})?`)) {
@@ -403,6 +465,7 @@ function deleteOrder(id) {
   let orders = loadOrders();
   orders = orders.filter(o => o.id !== id);
   saveOrders(orders);
+  deleteOrderInSheet(id);
   renderStats();
   renderOrders();
   showToast('Order deleted');
@@ -439,7 +502,12 @@ function saveNote() {
   const text = document.getElementById('note-textarea').value.trim();
   const orders = loadOrders();
   const o = orders.find(x => x.id === editingNoteId);
-  if (o) { o.adminNote = text; saveOrders(orders); renderOrders(); }
+  if (o) {
+    o.adminNote = text;
+    saveOrders(orders);
+    patchOrderInSheet(editingNoteId, { adminNote: text });
+    renderOrders();
+  }
   closeNoteModal();
   showToast('Note saved');
 }

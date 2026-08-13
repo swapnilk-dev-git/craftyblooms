@@ -136,6 +136,7 @@
             <tr><td><code>ORDERS_KEY</code></td><td><code>'craftyblooms_orders_v1'</code></td></tr>
             <tr><td><code>ADMIN_AUTH_KEY</code></td><td><code>'cb_admin_auth_v1'</code></td></tr>
             <tr><td><code>GIFTWRAP_THRESHOLD</code></td><td><code>499</code> (₹, line 312)</td></tr>
+            <tr><td><code>GAS_URL</code></td><td><code>''</code> — paste Apps Script Web App URL here to enable Sheet sync</td></tr>
           </table>
         </div>
         <div>
@@ -148,6 +149,7 @@
             <tr><td><code>LOCKOUT_KEY</code></td><td><code>'cb_admin_lockout_v1'</code></td></tr>
             <tr><td><code>MAX_ATTEMPTS</code></td><td><code>3</code></td></tr>
             <tr><td><code>LOCKOUT_MS</code></td><td><code>300000</code> (5 min)</td></tr>
+            <tr><td><code>GAS_URL</code></td><td><code>''</code> — same Apps Script URL as catalog.js</td></tr>
           </table>
         </div>
       </div>
@@ -285,6 +287,7 @@ git push craftyblooms <span class="str">"${hash}:refs/heads/main"</span> --force
     <div class="sec-body">
       <table>
         <tr><th>Hash</th><th>Description</th></tr>
+        <tr><td><code>pending</code></td><td><span class="badge badge--green">FEAT</span> Google Sheets backend — cross-device order sync via Apps Script; Code.gs, GAS_URL in catalog.js + admin.js, syncFromSheet, patchOrderInSheet, deleteOrderInSheet</td></tr>
         <tr><td><code>ba3792f</code></td><td><span class="badge badge--blue">FIX</span> E2E audit — 8 bugs fixed: search crash guard, alert→toast in editor, empty-image PLACEHOLDER fallback, nav/pill sync, mobile search double-render, QV qty stepper, badge auto-clear on pending filter</td></tr>
         <tr><td><code>8f2c4a5</code></td><td><span class="badge badge--blue">FIX</span> Orders not appearing in admin — visibilitychange auto-refresh, manual Refresh btn, surface logOrder errors to user</td></tr>
         <tr><td><code>fde5a1b</code></td><td><span class="badge badge--green">FEAT</span> Admin new-order notification badge (pulsing) + browser Notification API + 10s localStorage poller</td></tr>
@@ -311,12 +314,12 @@ git push craftyblooms <span class="str">"${hash}:refs/heads/main"</span> --force
     <div class="sec-body">
       <table>
         <tr><th>#</th><th>Issue</th><th>Workaround / Notes</th></tr>
-        <tr><td>1</td><td><strong>Cross-device order sync</strong> — localStorage is siloed per browser/device. Orders on customer's phone won't appear in admin on a different device.</td><td>The WA message itself is the order receipt. Admin reads from WA. Fix: Google Sheets + Apps Script backend (not yet built).</td></tr>
+        <tr><td>1</td><td><strong>Cross-device order sync</strong> — <span class="badge badge--green">FIXED</span> Google Sheets backend syncs orders across all devices once <code>GAS_URL</code> is set.</td><td>Deploy <code>Code.gs</code> as an Apps Script Web App → paste URL into <code>GAS_URL</code> in both <code>catalog.js</code> and <code>admin.js</code>.</td></tr>
         <tr><td>2</td><td><strong>Subtree split cache</strong> — reusing a branch name re-points to old hash, push is a no-op.</td><td>Always use <code>--rejoin</code> flag + push raw hash. Never reuse branch names.</td></tr>
         <tr><td>3</td><td><strong>CSS custom properties in inline styles</strong> — <code>var(--red)</code> doesn't work in <code>element.style.borderColor</code></td><td>Use hardcoded hex <code>#C8102E</code> in JS for inline border colors.</td></tr>
         <tr><td>4</td><td><strong>localStorage 5MB limit</strong> — base64 uploaded images (via product editor) fill it fast.</td><td>Use relative <code>Images/</code> paths for default products. Only upload small images via editor.</td></tr>
         <tr><td>5</td><td><strong>No WhatsApp API for sending to customers</strong> — cannot send programmatically without Meta Business API approval.</td><td>Admin uses "Send Confirmation" button which pre-fills a WA message the admin sends manually.</td></tr>
-        <tr><td>6</td><td><strong>New-order notification poller is same-device only</strong> — storage events only fire cross-tab on same device.</td><td>Works fine if admin dashboard is open on same device/browser as store. Cross-device needs backend.</td></tr>
+        <tr><td>6</td><td><strong>New-order notification poller is same-device only</strong> — <span class="badge badge--green">FIXED</span> With Sheet backend, <code>syncFromSheet()</code> fetches live data on every 10s poll + tab focus.</td><td>Requires <code>GAS_URL</code> to be set.</td></tr>
         <tr><td>7</td><td><strong>GIFTWRAP_THRESHOLD</strong> must be declared before <code>openOrderForm()</code></td><td>Declared at line 312 in catalog.js — do not move it below line ~340.</td></tr>
       </table>
     </div>
