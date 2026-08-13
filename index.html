@@ -5,165 +5,247 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crafty Blooms — Handcrafted Chenille Stem Products</title>
   <meta name="description" content="Handcrafted pipe cleaner and chenille stem flowers, toys and décor. Handmade with love.">
-
-  <!-- Poppins Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════
-     SITE HEADER
-════════════════════════════════════════════ -->
+<!-- ══ ANNOUNCEMENT BAR ══════════════════════════════════════ -->
+<div class="announce-bar">
+  Free gift wrapping on orders above ₹499 &nbsp;·&nbsp; Custom orders welcome &nbsp;·&nbsp;
+  <a href="https://wa.me/917030261766" target="_blank">WhatsApp us ↗</a>
+</div>
+
+<!-- ══ SITE HEADER ═══════════════════════════════════════════ -->
 <header class="site-header" id="site-header">
   <div class="site-header__inner">
+
+    <div class="header-left">
+      <button class="header-icon-btn" id="edit-mode-btn" onclick="toggleEditMode()" title="Edit Mode">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="18" height="18"><path d="M14.7 3.3a1 1 0 011.4 1.4L6.4 14.5l-2.8.7.7-2.8L14.7 3.3z"/></svg>
+      </button>
+      <button class="header-icon-btn btn--add" id="add-product-btn" onclick="openNewProductForm()" style="display:none;" title="Add Product">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="18" height="18"><path d="M10 4v12M4 10h12"/></svg>
+      </button>
+    </div>
 
     <div class="site-header__brand">
       <a class="brand-wordmark" href="#top">crafty blooms</a>
       <p class="brand-tagline">handcrafted with love</p>
     </div>
 
-    <div class="site-header__actions">
-      <button class="btn btn--add" id="add-product-btn" onclick="openNewProductForm()" style="display:none;">
-        + Add Product
-      </button>
-      <button class="btn btn--edit-mode" id="edit-mode-btn" onclick="toggleEditMode()">
-        ✏ Edit Mode
+    <div class="header-right">
+      <button class="header-icon-btn" onclick="toggleMobileSearch()" title="Search">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="18" height="18"><circle cx="8.5" cy="8.5" r="5"/><path d="M15 15l-3-3"/></svg>
       </button>
       <button class="btn btn--pdf" id="pdf-btn" onclick="exportPDF()">
-        ⬇ Download PDF
+        ⬇ Catalog PDF
       </button>
     </div>
 
+  </div>
+
+  <nav class="site-nav" aria-label="Product categories">
+    <div class="site-nav__inner">
+      <a class="nav-link nav-link--active" href="#section-flowers" onclick="setFilter('flowers')">Pipe Cleaner Flowers</a>
+      <a class="nav-link" href="#section-toys"    onclick="setFilter('toys')">Toys &amp; Animals</a>
+      <a class="nav-link" href="#top"             onclick="setFilter('all')">All Products</a>
+      <a class="nav-link" href="https://wa.me/917030261766?text=Hi! I'd like to place a custom order." target="_blank">Custom Orders</a>
+      <a class="nav-link" href="https://wa.me/917030261766" target="_blank">Contact</a>
+    </div>
+  </nav>
+
+  <div class="mobile-search" id="mobile-search" style="display:none;">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="15" height="15"><circle cx="8.5" cy="8.5" r="5"/><path d="M15 15l-3-3"/></svg>
+      <input type="search" id="search-input-mobile" placeholder="Search products…" oninput="onSearchInput(event)" autocomplete="off">
+    </div>
   </div>
 </header>
 
 
-<!-- ════════════════════════════════════════════
-     HERO BANNER
-════════════════════════════════════════════ -->
-<section class="hero-banner" id="top">
-  <p class="hero-banner__eyebrow">100% Handmade · Chenille Stem Craft</p>
-  <h1 class="hero-banner__title">crafty blooms</h1>
-  <p class="hero-banner__sub">
-    Flowers, toys &amp; décor — each piece shaped by hand, stem by stem.
-    Perfect for gifting, home décor, and festive occasions.
-  </p>
-  <div class="hero-banner__trust">
-    <span class="trust-item">Women-run Business</span>
-    <span class="trust-item">Custom Orders Welcome</span>
-    <span class="trust-item">Quality Guaranteed</span>
-    <span class="trust-item">WhatsApp: +91-7030261766</span>
+<!-- ══ COLLECTION HERO ════════════════════════════════════════ -->
+<section class="collection-hero" id="top">
+  <div class="collection-hero__inner">
+    <p class="collection-hero__eyebrow">100% Handmade · Chenille Stem Craft</p>
+    <h1 class="collection-hero__title">crafty blooms</h1>
+    <p class="collection-hero__sub">Flowers, animals &amp; décor — each piece shaped by hand, stem by stem.<br>Perfect for gifting, home décor and festive occasions.</p>
+    <div class="trust-strip">
+      <span class="trust-strip__item">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M10 2l1.8 5.4H17l-4.5 3.3 1.7 5.3L10 13 5.8 16l1.7-5.3L3 7.4h5.2z"/></svg>
+        Women-run Business
+      </span>
+      <span class="trust-strip__item">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 10l2 2 4-4"/></svg>
+        Quality Guaranteed
+      </span>
+      <span class="trust-strip__item">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M10 2C6 2 3 5 3 9c0 5 7 9 7 9s7-4 7-9c0-4-3-7-7-7z"/></svg>
+        Customise Your Own
+      </span>
+      <span class="trust-strip__item">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2"/></svg>
+        Partial COD Available
+      </span>
+    </div>
   </div>
 </section>
 
 
-<!-- ════════════════════════════════════════════
-     CATALOG MAIN
-════════════════════════════════════════════ -->
+<!-- ══ FILTER TOOLBAR ════════════════════════════════════════ -->
+<div class="toolbar" id="toolbar">
+  <div class="toolbar__inner">
+    <div class="toolbar__left">
+      <div class="search-input-wrap toolbar__search">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="14" height="14"><circle cx="8.5" cy="8.5" r="5"/><path d="M15 15l-3-3"/></svg>
+        <input type="search" id="search-input" placeholder="Search products…" oninput="onSearchInput(event)" autocomplete="off">
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill filter-pill--active" data-cat="all"     onclick="setFilter('all')">All</button>
+        <button class="filter-pill"                     data-cat="flowers" onclick="setFilter('flowers')">Flowers</button>
+        <button class="filter-pill"                     data-cat="toys"    onclick="setFilter('toys')">Toys</button>
+      </div>
+    </div>
+    <div class="toolbar__right">
+      <span class="toolbar__count" id="search-results-count"></span>
+      <select id="sort-select" onchange="onSortChange(event)" aria-label="Sort">
+        <option value="default">Sort: Best Selling</option>
+        <option value="asc">Price: Low to High</option>
+        <option value="desc">Price: High to Low</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ CATALOG MAIN ══════════════════════════════════════════ -->
 <main class="catalog-main" id="catalog-main">
 
-  <!-- ── FLOWERS SECTION ── -->
   <section class="catalog-section" id="section-flowers">
-    <div class="filter-strip">
-      <span class="filter-strip__left">Pipe Cleaner Flowers</span>
-      <div class="filter-strip__right">
-        <span class="filter-strip__count" id="flowers-count">27 products</span>
-        <span class="filter-strip__from"  id="flowers-from">from ₹249</span>
+    <div class="section-header">
+      <div class="section-header__inner">
+        <h2 class="section-header__title">Pipe Cleaner Flowers</h2>
+        <div class="section-header__meta">
+          <span id="flowers-count">27 products</span>
+          <span class="section-header__sep">·</span>
+          <span id="flowers-from" class="section-header__from">from ₹249</span>
+        </div>
       </div>
     </div>
-    <div class="product-grid" id="flowers-grid">
-      <!-- Rendered by catalog.js -->
-    </div>
+    <div class="product-grid" id="flowers-grid"></div>
   </section>
 
-  <div class="section-divider"></div>
+  <div class="section-rule"></div>
 
-  <!-- ── TOYS & ANIMALS SECTION ── -->
   <section class="catalog-section" id="section-toys">
-    <div class="filter-strip">
-      <span class="filter-strip__left">Toys &amp; Animals</span>
-      <div class="filter-strip__right">
-        <span class="filter-strip__count" id="toys-count">19 products</span>
-        <span class="filter-strip__from"  id="toys-from">from ₹149</span>
+    <div class="section-header">
+      <div class="section-header__inner">
+        <h2 class="section-header__title">Toys &amp; Animals</h2>
+        <div class="section-header__meta">
+          <span id="toys-count">19 products</span>
+          <span class="section-header__sep">·</span>
+          <span id="toys-from" class="section-header__from">from ₹149</span>
+        </div>
       </div>
     </div>
-    <div class="product-grid" id="toys-grid">
-      <!-- Rendered by catalog.js -->
-    </div>
+    <div class="product-grid" id="toys-grid"></div>
   </section>
 
 </main>
 
 
-<!-- ════════════════════════════════════════════
-     SITE FOOTER
-════════════════════════════════════════════ -->
+<!-- ══ SITE FOOTER ═══════════════════════════════════════════ -->
 <footer class="site-footer">
-  <div class="site-footer__inner">
+  <div class="site-footer__top">
 
-    <div class="footer-brand">
-      <div class="footer-brand__wordmark">crafty blooms</div>
-      <div class="footer-brand__tagline">handcrafted with love</div>
-      <p class="footer-brand__desc">
-        Every product is handmade using premium chenille stems.
-        No two pieces are exactly the same — that's the beauty of handcraft.
-      </p>
-    </div>
-
-    <div class="footer-contact">
-      <div class="footer-contact__heading">Contact Us</div>
-      <div class="footer-contact__item">
-        <span class="footer-contact__label">WhatsApp</span>
-        <a class="footer-contact__value" href="https://wa.me/917030261766">+91-7030261766</a>
-      </div>
-      <div class="footer-contact__item">
-        <span class="footer-contact__label">Instagram</span>
-        <a class="footer-contact__value" href="https://instagram.com/craftyblooms" target="_blank">@craftyblooms</a>
-      </div>
-      <div class="footer-contact__item">
-        <span class="footer-contact__label">Orders</span>
-        <span class="footer-contact__value">Custom orders welcome</span>
+    <div class="footer-col footer-col--brand">
+      <div class="footer-wordmark">crafty blooms</div>
+      <div class="footer-tagline">handcrafted with love</div>
+      <p class="footer-desc">Every piece is shaped by hand using premium chenille stems. No two are exactly alike — that's the beauty of handcraft.</p>
+      <div class="footer-socials">
+        <a class="footer-social" href="https://wa.me/917030261766" target="_blank">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          +91-7030261766
+        </a>
+        <a class="footer-social" href="https://instagram.com/craftyblooms" target="_blank">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="16" height="16"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          @craftyblooms
+        </a>
       </div>
     </div>
 
-    <div class="footer-policy">
-      <div class="footer-policy__heading">Good to Know</div>
-      <ul class="footer-policy__list">
+    <div class="footer-col">
+      <h4 class="footer-col__heading">Shop</h4>
+      <ul class="footer-col__list">
+        <li><a href="#section-flowers" onclick="setFilter('flowers')">Pipe Cleaner Flowers</a></li>
+        <li><a href="#section-toys" onclick="setFilter('toys')">Toys &amp; Animals</a></li>
+        <li><a href="https://wa.me/917030261766?text=Custom order" target="_blank">Custom Orders</a></li>
+        <li><a href="https://wa.me/917030261766?text=Bulk pricing" target="_blank">Bulk &amp; Wholesale</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col__heading">Good to Know</h4>
+      <ul class="footer-col__list">
         <li>Each item is made to order</li>
-        <li>Bulk &amp; wholesale pricing available</li>
         <li>Gift packaging on request</li>
-        <li>Avoid water · dust gently to clean</li>
-        <li>Colours may vary slightly — handmade</li>
+        <li>Avoid water · dust gently</li>
+        <li>Colours may vary — handmade</li>
+        <li>Partial COD available</li>
       </ul>
     </div>
 
   </div>
   <div class="site-footer__bottom">
     <span>© 2025 Crafty Blooms. All rights reserved.</span>
-    <span>Handcrafted with Love ❤</span>
+    <span>Made with ❤ by hand, stem by stem.</span>
   </div>
 </footer>
 
 
-<!-- ════════════════════════════════════════════
-     CROP MODAL
-════════════════════════════════════════════ -->
+<!-- ══ QUICK VIEW MODAL ══════════════════════════════════════ -->
+<div id="quickview-modal" role="dialog" aria-modal="true" aria-labelledby="qv-name">
+  <div class="qv-panel">
+    <div class="qv-gallery">
+      <img id="qv-img" src="" alt="">
+      <button class="qv-arrow qv-arrow--prev" id="qv-prev" onclick="qvPrev()" aria-label="Previous">&#8249;</button>
+      <button class="qv-arrow qv-arrow--next" id="qv-next" onclick="qvNext()" aria-label="Next">&#8250;</button>
+      <span class="qv-counter" id="qv-counter"></span>
+      <div id="qv-thumbs"></div>
+    </div>
+    <div class="qv-details">
+      <button class="qv-close" onclick="closeQuickView()" aria-label="Close">✕</button>
+      <span class="qv-cat-tag" id="qv-cat"></span>
+      <h2 id="qv-name"></h2>
+      <p class="qv-sku" id="qv-sku"></p>
+      <div id="qv-price-row"></div>
+      <p id="qv-desc"></p>
+      <a class="qv-wa-btn" id="qv-wa-btn" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Order on WhatsApp
+      </a>
+      <div class="qv-trust">
+        <span class="qv-trust-item">Handmade with Love</span>
+        <span class="qv-trust-item">Custom Orders Welcome</span>
+        <span class="qv-trust-item">Quality Guaranteed</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ CROP MODAL ════════════════════════════════════════════ -->
 <div id="crop-modal" role="dialog" aria-modal="true" aria-labelledby="crop-modal-title">
   <div class="crop-modal__panel">
-
     <div class="crop-modal__header">
       <h2 id="crop-modal-title">Adjust Crop</h2>
       <button class="modal-close" onclick="closeCropModal()" aria-label="Close">✕</button>
     </div>
-
     <div class="crop-modal__body">
       <div id="crop-container">
-        <img id="crop-img" src="" alt="Product image for cropping" draggable="false">
+        <img id="crop-img" src="" alt="Crop" draggable="false">
         <div id="crop-overlay">
           <div class="crop-handle crop-handle--nw" data-handle="nw"></div>
           <div class="crop-handle crop-handle--n"  data-handle="n"></div>
@@ -176,44 +258,40 @@
         </div>
       </div>
       <p class="crop-modal__hint">Drag the box to reposition · drag corners to resize</p>
-
       <div class="crop-modal__upload">
-        <label>
-          📁 Upload a different image
-          <input type="file" accept="image/*" onchange="handleCropImageUpload(event)">
-        </label>
+        <label>📁 Upload a different image<input type="file" accept="image/*" onchange="handleCropImageUpload(event)"></label>
       </div>
     </div>
-
     <div class="crop-modal__actions">
-      <button class="btn"           onclick="resetCrop()">↺ Reset</button>
+      <button class="btn"              onclick="resetCrop()">↺ Reset</button>
       <button class="btn btn--primary" onclick="saveCrop()">✓ Save Crop</button>
     </div>
-
   </div>
 </div>
 
 
-<!-- ════════════════════════════════════════════
-     PRODUCT EDITOR DRAWER
-════════════════════════════════════════════ -->
+<!-- ══ PRODUCT EDITOR DRAWER ════════════════════════════════ -->
 <div id="editor-drawer" role="dialog" aria-modal="true" aria-labelledby="editor-title">
-
   <div class="drawer-header">
     <h2 id="editor-title">Edit Product</h2>
     <button class="modal-close" onclick="closeProductEditor()" aria-label="Close">✕</button>
   </div>
-
   <div class="drawer-body">
-
-    <!-- Hidden ID field -->
     <input type="hidden" id="editor-id">
-
+    <div class="form-group">
+      <label>Product Images</label>
+      <div class="editor-image-list" id="editor-image-list"></div>
+      <div class="form-upload" style="margin-bottom:6px;">
+        <label>🖼 Replace Hero Image<input type="file" accept="image/*" onchange="handleEditorHeroUpload(event)"></label>
+      </div>
+      <div class="form-upload">
+        <label>＋ Add More Images (multi-select)<input type="file" accept="image/*" multiple onchange="handleEditorMoreImages(event)"></label>
+      </div>
+    </div>
     <div class="form-group">
       <label for="editor-name">Product Name</label>
       <input type="text" id="editor-name" placeholder="e.g. Tulip Bouquet in Vase">
     </div>
-
     <div class="form-group">
       <label for="editor-category">Category</label>
       <select id="editor-category">
@@ -221,7 +299,6 @@
         <option value="toys">Toys &amp; Animals</option>
       </select>
     </div>
-
     <div class="form-row">
       <div class="form-group">
         <label for="editor-price">Sale Price (₹)</label>
@@ -229,76 +306,67 @@
       </div>
       <div class="form-group">
         <label for="editor-mrp">MRP / Strike Price (₹)</label>
-        <input type="number" id="editor-mrp" placeholder="399 (optional)" min="0">
+        <input type="number" id="editor-mrp" placeholder="399" min="0">
       </div>
     </div>
-
     <div class="form-group">
       <label for="editor-desc">Short Description</label>
-      <textarea id="editor-desc" placeholder="8–20 words describing the product…"></textarea>
+      <textarea id="editor-desc" placeholder="8–20 words…"></textarea>
     </div>
-
     <label class="form-check">
       <input type="checkbox" id="editor-featured">
-      ★ Mark as Featured (shows badge, appears on PDF cover)
+      ★ Mark as Featured
     </label>
-
-    <div class="form-upload">
-      <label>
-        🖼 Upload / Replace Image
-        <input type="file" accept="image/*" onchange="handleEditorImageUpload(event)">
-      </label>
-    </div>
-
-  </div><!-- /drawer-body -->
-
+  </div>
   <div class="drawer-actions">
     <button class="btn btn--primary" onclick="saveProductForm()" style="width:100%;">✓ Save Product</button>
     <button class="btn btn--danger"  id="editor-delete-btn" onclick="deleteProduct(document.getElementById('editor-id').value)" style="width:100%;display:none;">🗑 Delete Product</button>
     <button class="btn"              onclick="closeProductEditor()" style="width:100%;">Cancel</button>
   </div>
-
 </div>
-<!-- Overlay behind drawer -->
 <div id="editor-overlay"></div>
 
-
-<!-- ════════════════════════════════════════════
-     TOAST NOTIFICATION
-════════════════════════════════════════════ -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-
-<!-- ════════════════════════════════════════════
-     SCRIPTS
-════════════════════════════════════════════ -->
-
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<!-- Catalog Logic -->
 <script src="catalog.js"></script>
-
-<!-- Drawer overlay wiring (needs DOM) -->
 <script>
-  // Show overlay when drawer opens
-  const _drawer  = document.getElementById('editor-drawer');
-  const _overlay = document.getElementById('editor-overlay');
-  const _obs = new MutationObserver(() => {
-    _overlay.style.display = _drawer.classList.contains('open') ? 'block' : 'none';
-  });
-  _obs.observe(_drawer, { attributes: true, attributeFilter: ['class'] });
+  const _drawer=document.getElementById('editor-drawer');
+  const _overlay=document.getElementById('editor-overlay');
+  new MutationObserver(()=>{ _overlay.style.display=_drawer.classList.contains('open')?'block':'none'; })
+    .observe(_drawer,{attributes:true,attributeFilter:['class']});
 
-  // Toast helper
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2400);
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2400);
   }
-</script>
 
+  function toggleMobileSearch(){
+    const el=document.getElementById('mobile-search');
+    el.style.display=el.style.display==='none'?'block':'none';
+    if(el.style.display==='block') el.querySelector('input').focus();
+  }
+
+  document.getElementById('search-input-mobile').addEventListener('input', e=>{
+    const main=document.getElementById('search-input');
+    if(main){ main.value=e.target.value; onSearchInput({target:main}); }
+  });
+
+  // Active nav link on scroll
+  const _sections=['section-flowers','section-toys'];
+  const _navLinks=document.querySelectorAll('.nav-link');
+  const _sObs=new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        _navLinks.forEach(l=>l.classList.remove('nav-link--active'));
+        const m=document.querySelector(`.nav-link[href="#${en.target.id}"]`);
+        if(m) m.classList.add('nav-link--active');
+      }
+    });
+  },{threshold:0.3});
+  _sections.forEach(id=>{const el=document.getElementById(id);if(el)_sObs.observe(el);});
+</script>
 </body>
 </html>
