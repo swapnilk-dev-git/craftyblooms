@@ -977,13 +977,21 @@ body.edit-mode-on::after {
 }
 .card-qv-btn:hover { color: var(--ink-900); border-color: var(--ink-500); }
 
-/* ── QUICK VIEW Add to Cart button ── */
+/* ── QUICK VIEW qty row + Add to Cart button ── */
+.qv-qty-row {
+  display: flex; align-items: stretch; gap: 8px; margin-top: 6px;
+}
+.qv-qty-row .card-qty-wrap {
+  flex-shrink: 0;
+}
+.qv-qty-row .card-qty-btn { width: 34px; height: 44px; font-size: 16px; }
+.qv-qty-row .card-qty-val { min-width: 32px; line-height: 44px; }
 .qv-atc-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   padding: 13px 20px; background: var(--ink-900); color: #fff;
   font-size: 13px; font-weight: 500; border-radius: var(--r);
-  margin-top: 6px; transition: background var(--ease); font-family: var(--font);
-  cursor: pointer; border: none; width: 100%;
+  transition: background var(--ease); font-family: var(--font);
+  cursor: pointer; border: none; flex: 1;
 }
 .qv-atc-btn:hover { background: var(--ink-700); }
 

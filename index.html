@@ -83,7 +83,7 @@
   <div class="mobile-search" id="mobile-search" style="display:none;">
     <div class="search-input-wrap">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="15" height="15"><circle cx="8.5" cy="8.5" r="5"/><path d="M15 15l-3-3"/></svg>
-      <input type="search" id="search-input-mobile" placeholder="Search products…" oninput="onSearchInput(event)" autocomplete="off">
+      <input type="search" id="search-input-mobile" placeholder="Search products…" autocomplete="off">
     </div>
   </div>
 </header>
@@ -247,10 +247,17 @@
       <p class="qv-sku" id="qv-sku"></p>
       <div id="qv-price-row"></div>
       <p id="qv-desc"></p>
-      <button class="qv-atc-btn" onclick="qvAddToCart()">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="16" height="16"><path d="M3 3h2l.4 2M7 13h10l2-7H5.4"/><circle cx="9" cy="17" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="17" r="1.5" fill="currentColor" stroke="none"/></svg>
-        Add to Cart
-      </button>
+      <div class="qv-qty-row">
+        <div class="card-qty-wrap">
+          <button class="card-qty-btn" onclick="qvQtyChange(-1)" aria-label="Decrease quantity">−</button>
+          <span class="card-qty-val" id="qv-qty-val">1</span>
+          <button class="card-qty-btn" onclick="qvQtyChange(1)" aria-label="Increase quantity">+</button>
+        </div>
+        <button class="qv-atc-btn" onclick="qvAddToCart()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="16" height="16"><path d="M3 3h2l.4 2M7 13h10l2-7H5.4"/><circle cx="9" cy="17" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="17" r="1.5" fill="currentColor" stroke="none"/></svg>
+          Add to Cart
+        </button>
+      </div>
       <div class="qv-trust">
         <span class="qv-trust-item">Handmade with Love</span>
         <span class="qv-trust-item">Custom Orders Welcome</span>

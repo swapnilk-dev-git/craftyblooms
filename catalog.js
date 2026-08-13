@@ -63,6 +63,7 @@ const STORAGE_KEY = 'craftyblooms_products_v2';
 function migrateProduct(p) {
   if (!p.files) p.files = p.file ? [p.file] : [];
   delete p.file;
+  if (p.description === undefined || p.description === null) p.description = '';
   return p;
 }
 
@@ -568,7 +569,7 @@ function getFilteredProducts() {
     const q = activeSearch.trim().toLowerCase();
     list = list.filter(p =>
       p.name.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q) ||
+      (p.description || '').toLowerCase().includes(q) ||
       p.id.toLowerCase().includes(q)
     );
   }
@@ -658,6 +659,11 @@ function setFilter(cat) {
   document.querySelectorAll('.filter-pill').forEach(el => {
     el.classList.toggle('filter-pill--active', el.dataset.cat === cat);
   });
+  // Keep nav links in sync with the active filter
+  document.querySelectorAll('.nav-link[onclick]').forEach(el => {
+    const match = el.getAttribute('onclick').match(/setFilter\('([^']+)'\)/);
+    if (match) el.classList.toggle('nav-link--active', match[1] === cat);
+  });
   renderCatalog();
 }
 
@@ -732,6 +738,10 @@ function openQuickView(productId) {
 
   qvStopAuto();
   if (multi) qvStartAuto();
+
+  // Reset QV qty stepper to 1 on each open
+  const qvQtyVal = document.getElementById('qv-qty-val');
+  if (qvQtyVal) qvQtyVal.textContent = '1';
 }
 
 function closeQuickView() {
@@ -779,11 +789,20 @@ function qvGoTo(idx) {
 function qvPrev() { qvStopAuto(); qvGoTo(qvImageIndex - 1); }
 function qvNext() { qvStopAuto(); qvGoTo(qvImageIndex + 1); }
 
+function qvQtyChange(delta) {
+  const span = document.getElementById('qv-qty-val');
+  if (!span) return;
+  let val = parseInt(span.textContent) + delta;
+  val = Math.max(1, Math.min(10, val));
+  span.textContent = val;
+}
+
 function qvAddToCart() {
-  if (qvProductId) {
-    addToCart(qvProductId);
-    closeQuickView();
-  }
+  if (!qvProductId) return;
+  const span = document.getElementById('qv-qty-val');
+  const qty  = span ? (parseInt(span.textContent) || 1) : 1;
+  addToCartWithQty(qvProductId, qty);
+  closeQuickView();
 }
 
 // ── 14. SCROLL FADE-IN ────────────────────────────────────────
@@ -1066,14 +1085,15 @@ function saveProductForm() {
   const stockEl  = document.getElementById('editor-stock');
   const stock    = stockEl ? stockEl.value : 'available';
 
-  if (!name)  { alert('Please enter a product name.'); return; }
-  if (!price) { alert('Please enter a price.'); return; }
+  if (!name)  { if (typeof showToast === 'function') showToast('⚠ Please enter a product name.'); return; }
+  if (!price) { if (typeof showToast === 'function') showToast('⚠ Please enter a price greater than 0.'); return; }
 
   const existing = products.find(p => p.id === editingProductId);
   if (existing) {
     Object.assign(existing, { name, category, price, mrp, description:desc, featured, stock });
   } else {
     const imgs = [window._pendingImageDataUrl, ...(window._pendingExtraImages||[])].filter(Boolean);
+    if (imgs.length === 0) imgs.push(PLACEHOLDER);
     window._pendingImageDataUrl = null;
     window._pendingExtraImages  = null;
     products.push({ id, files:imgs, name, category, price, mrp, description:desc, featured, stock, cropX:null,cropY:null,cropW:null,cropH:null });

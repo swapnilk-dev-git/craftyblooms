@@ -194,6 +194,7 @@ function setStatusFilter(status) {
   document.querySelectorAll('.spill').forEach(el => {
     el.classList.toggle('spill--active', el.dataset.status === status);
   });
+  if (status === 'pending') clearNewOrderBadge();
   renderOrders();
 }
 
