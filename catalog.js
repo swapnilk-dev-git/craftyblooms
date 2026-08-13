@@ -113,18 +113,41 @@ function getCartSubtotal() {
 }
 
 function addToCart(productId) {
+  addToCartWithQty(productId, 1);
+}
+
+function addToCartWithQty(productId, qty) {
   const p = products.find(x => x.id === productId);
   if (!p) return;
+  qty = Math.max(1, Math.min(10, parseInt(qty) || 1));
   const existing = cart.find(i => i.id === productId);
   if (existing) {
-    existing.qty++;
+    existing.qty = Math.min(10, existing.qty + qty);
   } else {
-    cart.push({ id: p.id, name: p.name, price: p.price, thumb: heroFile(p), qty: 1 });
+    cart.push({ id: p.id, name: p.name, price: p.price, thumb: heroFile(p), qty });
   }
   saveCart();
   updateCartBadge();
   flashCartBtn(productId);
-  if (typeof showToast === 'function') showToast(`✓ Added to cart`);
+  if (typeof showToast === 'function') showToast(`✓ ${qty > 1 ? qty + '× ' : ''}Added to cart`);
+}
+
+// Adjust card qty stepper display value
+function cardQtyChange(productId, delta) {
+  const wrap = document.querySelector(`.card-qty-wrap[data-id="${productId}"]`);
+  if (!wrap) return;
+  const span = wrap.querySelector('.card-qty-val');
+  let val = parseInt(span.textContent) + delta;
+  val = Math.max(1, Math.min(10, val));
+  span.textContent = val;
+}
+
+function cardAddToCart(productId) {
+  const wrap = document.querySelector(`.card-qty-wrap[data-id="${productId}"]`);
+  const qty  = wrap ? parseInt(wrap.querySelector('.card-qty-val').textContent) || 1 : 1;
+  addToCartWithQty(productId, qty);
+  // Reset stepper to 1 after adding
+  if (wrap) wrap.querySelector('.card-qty-val').textContent = '1';
 }
 
 function removeFromCart(productId) {
@@ -181,11 +204,12 @@ function updateMobileCartBar() {
 function flashCartBtn(productId) {
   const btn = document.querySelector(`.product-card__cta[data-id="${productId}"]`);
   if (!btn) return;
+  const origText = btn.textContent.trim();
   btn.classList.add('cart-btn--added');
   btn.textContent = '✓ Added';
   setTimeout(() => {
     btn.classList.remove('cart-btn--added');
-    btn.textContent = 'Add to Cart';
+    btn.textContent = origText || 'Add to Cart';
   }, 1400);
 }
 
@@ -472,11 +496,17 @@ function buildCardHTML(p) {
         </div>
         ${p.stock === 'sold_out'
           ? `<button class="product-card__cta product-card__cta--soldout" disabled>Sold Out</button>`
-          : p.stock === 'made_to_order'
-            ? `<button class="product-card__cta product-card__cta--mto" data-id="${p.id}"
-                       onclick="event.stopPropagation();addToCart('${p.id}')">Made to Order</button>`
-            : `<button class="product-card__cta" data-id="${p.id}"
-                       onclick="event.stopPropagation();addToCart('${p.id}')">Add to Cart</button>`
+          : `<div class="card-qty-row">
+               <div class="card-qty-wrap" data-id="${p.id}">
+                 <button class="card-qty-btn" onclick="event.stopPropagation();cardQtyChange('${p.id}',-1)" aria-label="Decrease">−</button>
+                 <span class="card-qty-val">1</span>
+                 <button class="card-qty-btn" onclick="event.stopPropagation();cardQtyChange('${p.id}',1)" aria-label="Increase">+</button>
+               </div>
+               <button class="product-card__cta product-card__cta--inline${p.stock === 'made_to_order' ? ' product-card__cta--mto' : ''}" data-id="${p.id}"
+                       onclick="event.stopPropagation();cardAddToCart('${p.id}')">
+                 ${p.stock === 'made_to_order' ? 'Made to Order' : 'Add to Cart'}
+               </button>
+             </div>`
         }
         <div class="product-card__footer">
           <span class="product-card__sku">${p.id}</span>

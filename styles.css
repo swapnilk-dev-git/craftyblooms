@@ -944,6 +944,29 @@ body.edit-mode-on::after {
 .product-card__cta:hover { background: var(--ink-900); color: #fff; }
 .product-card__cta.cart-btn--added { background: var(--ink-900); color: #fff; }
 
+/* ── CARD QTY STEPPER ── */
+.card-qty-row {
+  display: flex; align-items: center; gap: 6px; margin-top: 8px;
+}
+.card-qty-wrap {
+  display: flex; align-items: center; border: 1px solid var(--rule); border-radius: var(--r);
+  overflow: hidden; flex-shrink: 0;
+}
+.card-qty-btn {
+  width: 28px; height: 32px; background: var(--bg-soft); border: none;
+  font-size: 15px; font-weight: 500; color: var(--ink-700); cursor: pointer;
+  transition: background var(--ease); display: flex; align-items: center; justify-content: center;
+  font-family: var(--font);
+}
+.card-qty-btn:hover { background: var(--rule); }
+.card-qty-val {
+  min-width: 26px; text-align: center; font-size: 12px; font-weight: 500; color: var(--ink-900);
+  user-select: none; line-height: 32px;
+}
+.product-card__cta--inline {
+  flex: 1; margin-top: 0; display: block;
+}
+
 /* ── QUICK VIEW BUTTON on card (replaces WA) ── */
 .card-qv-btn {
   display: inline-flex; align-items: center; gap: 4px;
