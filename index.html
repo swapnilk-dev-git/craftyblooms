@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crafty Blooms — Handcrafted Chenille Stem Products</title>
+  <meta name="description" content="Handcrafted pipe cleaner and chenille stem flowers, toys and décor. Handmade with love.">
+
+  <!-- Poppins Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     SITE HEADER
+════════════════════════════════════════════ -->
+<header class="site-header" id="site-header">
+  <div class="site-header__inner">
+
+    <div class="site-header__brand">
+      <a class="brand-wordmark" href="#top">crafty blooms</a>
+      <p class="brand-tagline">handcrafted with love</p>
+    </div>
+
+    <div class="site-header__actions">
+      <button class="btn btn--add" id="add-product-btn" onclick="openNewProductForm()" style="display:none;">
+        + Add Product
+      </button>
+      <button class="btn btn--edit-mode" id="edit-mode-btn" onclick="toggleEditMode()">
+        ✏ Edit Mode
+      </button>
+      <button class="btn btn--pdf" id="pdf-btn" onclick="exportPDF()">
+        ⬇ Download PDF
+      </button>
+    </div>
+
+  </div>
+</header>
+
+
+<!-- ════════════════════════════════════════════
+     HERO BANNER
+════════════════════════════════════════════ -->
+<section class="hero-banner" id="top">
+  <p class="hero-banner__eyebrow">100% Handmade · Chenille Stem Craft</p>
+  <h1 class="hero-banner__title">crafty blooms</h1>
+  <p class="hero-banner__sub">
+    Flowers, toys &amp; décor — each piece shaped by hand, stem by stem.
+    Perfect for gifting, home décor, and festive occasions.
+  </p>
+  <div class="hero-banner__trust">
+    <span class="trust-item">Women-run Business</span>
+    <span class="trust-item">Custom Orders Welcome</span>
+    <span class="trust-item">Quality Guaranteed</span>
+    <span class="trust-item">WhatsApp: +91-7030261766</span>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════
+     CATALOG MAIN
+════════════════════════════════════════════ -->
+<main class="catalog-main" id="catalog-main">
+
+  <!-- ── FLOWERS SECTION ── -->
+  <section class="catalog-section" id="section-flowers">
+    <div class="filter-strip">
+      <span class="filter-strip__left">Pipe Cleaner Flowers</span>
+      <div class="filter-strip__right">
+        <span class="filter-strip__count" id="flowers-count">27 products</span>
+        <span class="filter-strip__from"  id="flowers-from">from ₹249</span>
+      </div>
+    </div>
+    <div class="product-grid" id="flowers-grid">
+      <!-- Rendered by catalog.js -->
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ── TOYS & ANIMALS SECTION ── -->
+  <section class="catalog-section" id="section-toys">
+    <div class="filter-strip">
+      <span class="filter-strip__left">Toys &amp; Animals</span>
+      <div class="filter-strip__right">
+        <span class="filter-strip__count" id="toys-count">19 products</span>
+        <span class="filter-strip__from"  id="toys-from">from ₹149</span>
+      </div>
+    </div>
+    <div class="product-grid" id="toys-grid">
+      <!-- Rendered by catalog.js -->
+    </div>
+  </section>
+
+</main>
+
+
+<!-- ════════════════════════════════════════════
+     SITE FOOTER
+════════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="site-footer__inner">
+
+    <div class="footer-brand">
+      <div class="footer-brand__wordmark">crafty blooms</div>
+      <div class="footer-brand__tagline">handcrafted with love</div>
+      <p class="footer-brand__desc">
+        Every product is handmade using premium chenille stems.
+        No two pieces are exactly the same — that's the beauty of handcraft.
+      </p>
+    </div>
+
+    <div class="footer-contact">
+      <div class="footer-contact__heading">Contact Us</div>
+      <div class="footer-contact__item">
+        <span class="footer-contact__label">WhatsApp</span>
+        <a class="footer-contact__value" href="https://wa.me/917030261766">+91-7030261766</a>
+      </div>
+      <div class="footer-contact__item">
+        <span class="footer-contact__label">Instagram</span>
+        <a class="footer-contact__value" href="https://instagram.com/craftyblooms" target="_blank">@craftyblooms</a>
+      </div>
+      <div class="footer-contact__item">
+        <span class="footer-contact__label">Orders</span>
+        <span class="footer-contact__value">Custom orders welcome</span>
+      </div>
+    </div>
+
+    <div class="footer-policy">
+      <div class="footer-policy__heading">Good to Know</div>
+      <ul class="footer-policy__list">
+        <li>Each item is made to order</li>
+        <li>Bulk &amp; wholesale pricing available</li>
+        <li>Gift packaging on request</li>
+        <li>Avoid water · dust gently to clean</li>
+        <li>Colours may vary slightly — handmade</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="site-footer__bottom">
+    <span>© 2025 Crafty Blooms. All rights reserved.</span>
+    <span>Handcrafted with Love ❤</span>
+  </div>
+</footer>
+
+
+<!-- ════════════════════════════════════════════
+     CROP MODAL
+════════════════════════════════════════════ -->
+<div id="crop-modal" role="dialog" aria-modal="true" aria-labelledby="crop-modal-title">
+  <div class="crop-modal__panel">
+
+    <div class="crop-modal__header">
+      <h2 id="crop-modal-title">Adjust Crop</h2>
+      <button class="modal-close" onclick="closeCropModal()" aria-label="Close">✕</button>
+    </div>
+
+    <div class="crop-modal__body">
+      <div id="crop-container">
+        <img id="crop-img" src="" alt="Product image for cropping" draggable="false">
+        <div id="crop-overlay">
+          <div class="crop-handle crop-handle--nw" data-handle="nw"></div>
+          <div class="crop-handle crop-handle--n"  data-handle="n"></div>
+          <div class="crop-handle crop-handle--ne" data-handle="ne"></div>
+          <div class="crop-handle crop-handle--w"  data-handle="w"></div>
+          <div class="crop-handle crop-handle--e"  data-handle="e"></div>
+          <div class="crop-handle crop-handle--sw" data-handle="sw"></div>
+          <div class="crop-handle crop-handle--s"  data-handle="s"></div>
+          <div class="crop-handle crop-handle--se" data-handle="se"></div>
+        </div>
+      </div>
+      <p class="crop-modal__hint">Drag the box to reposition · drag corners to resize</p>
+
+      <div class="crop-modal__upload">
+        <label>
+          📁 Upload a different image
+          <input type="file" accept="image/*" onchange="handleCropImageUpload(event)">
+        </label>
+      </div>
+    </div>
+
+    <div class="crop-modal__actions">
+      <button class="btn"           onclick="resetCrop()">↺ Reset</button>
+      <button class="btn btn--primary" onclick="saveCrop()">✓ Save Crop</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PRODUCT EDITOR DRAWER
+════════════════════════════════════════════ -->
+<div id="editor-drawer" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+
+  <div class="drawer-header">
+    <h2 id="editor-title">Edit Product</h2>
+    <button class="modal-close" onclick="closeProductEditor()" aria-label="Close">✕</button>
+  </div>
+
+  <div class="drawer-body">
+
+    <!-- Hidden ID field -->
+    <input type="hidden" id="editor-id">
+
+    <div class="form-group">
+      <label for="editor-name">Product Name</label>
+      <input type="text" id="editor-name" placeholder="e.g. Tulip Bouquet in Vase">
+    </div>
+
+    <div class="form-group">
+      <label for="editor-category">Category</label>
+      <select id="editor-category">
+        <option value="flowers">Pipe Cleaner Flowers</option>
+        <option value="toys">Toys &amp; Animals</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="editor-price">Sale Price (₹)</label>
+        <input type="number" id="editor-price" placeholder="249" min="0">
+      </div>
+      <div class="form-group">
+        <label for="editor-mrp">MRP / Strike Price (₹)</label>
+        <input type="number" id="editor-mrp" placeholder="399 (optional)" min="0">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="editor-desc">Short Description</label>
+      <textarea id="editor-desc" placeholder="8–20 words describing the product…"></textarea>
+    </div>
+
+    <label class="form-check">
+      <input type="checkbox" id="editor-featured">
+      ★ Mark as Featured (shows badge, appears on PDF cover)
+    </label>
+
+    <div class="form-upload">
+      <label>
+        🖼 Upload / Replace Image
+        <input type="file" accept="image/*" onchange="handleEditorImageUpload(event)">
+      </label>
+    </div>
+
+  </div><!-- /drawer-body -->
+
+  <div class="drawer-actions">
+    <button class="btn btn--primary" onclick="saveProductForm()" style="width:100%;">✓ Save Product</button>
+    <button class="btn btn--danger"  id="editor-delete-btn" onclick="deleteProduct(document.getElementById('editor-id').value)" style="width:100%;display:none;">🗑 Delete Product</button>
+    <button class="btn"              onclick="closeProductEditor()" style="width:100%;">Cancel</button>
+  </div>
+
+</div>
+<!-- Overlay behind drawer -->
+<div id="editor-overlay"></div>
+
+
+<!-- ════════════════════════════════════════════
+     TOAST NOTIFICATION
+════════════════════════════════════════════ -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- Catalog Logic -->
+<script src="catalog.js"></script>
+
+<!-- Drawer overlay wiring (needs DOM) -->
+<script>
+  // Show overlay when drawer opens
+  const _drawer  = document.getElementById('editor-drawer');
+  const _overlay = document.getElementById('editor-overlay');
+  const _obs = new MutationObserver(() => {
+    _overlay.style.display = _drawer.classList.contains('open') ? 'block' : 'none';
+  });
+  _obs.observe(_drawer, { attributes: true, attributeFilter: ['class'] });
+
+  // Toast helper
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+</script>
+
+</body>
+</html>
