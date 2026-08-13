@@ -758,6 +758,14 @@ body.edit-mode-on::after {
   font-size: 10px; font-weight: 500; color: #fff;
   background: rgba(26,26,26,0.5); padding: 3px 8px; border-radius: 10px; letter-spacing: 0.5px;
 }
+.qv-playpause {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  background: rgba(26,26,26,0.55); color: #fff; border: none; border-radius: 50%;
+  width: 32px; height: 32px; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--ease); z-index: 5;
+}
+.qv-playpause:hover { background: rgba(26,26,26,0.85); }
 #qv-thumbs {
   position: absolute; bottom: 10px; left: 10px;
   display: flex; gap: 5px;
