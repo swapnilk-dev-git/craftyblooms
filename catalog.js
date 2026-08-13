@@ -198,12 +198,14 @@ function openCart() {
   document.getElementById('cart-drawer').classList.add('open');
   document.getElementById('cart-overlay').style.display = 'block';
   document.body.style.overflow = 'hidden';
+  activeModal = 'cart';
 }
 
 function closeCart() {
   document.getElementById('cart-drawer').classList.remove('open');
   document.getElementById('cart-overlay').style.display = 'none';
   document.body.style.overflow = '';
+  if (activeModal === 'cart') activeModal = null;
 }
 
 function renderCartItems() {
@@ -247,56 +249,105 @@ function renderCartItems() {
 
 // ── 5. ORDER CHECKOUT (name form → WA) ───────────────────────
 
+const WA_NUMBER = '918951436242'; // TEST number — change to 917030261766 for production
+
+function generateOrderId() {
+  try {
+    const orders  = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+    const today   = new Date();
+    const datePart = today.getFullYear().toString()
+                   + String(today.getMonth() + 1).padStart(2, '0')
+                   + String(today.getDate()).padStart(2, '0');
+    const prefix  = 'ORD-' + datePart + '-';
+    const count   = orders.filter(o => o.id && o.id.startsWith(prefix)).length;
+    return prefix + String(count + 1).padStart(3, '0');
+  } catch(e) {
+    return 'ORD-' + Date.now();
+  }
+}
+
 function openOrderForm() {
   if (cart.length === 0) { showToast('Your cart is empty!'); return; }
   document.getElementById('order-name-input').value = '';
   document.getElementById('order-note-input').value  = '';
+
+  // Populate cart summary in the modal
+  const summaryEl = document.getElementById('order-cart-summary');
+  if (summaryEl) {
+    const rows = cart.map(item =>
+      `<div class="ofc-row">
+        <span class="ofc-row__name">${item.name} <span class="ofc-row__qty">× ${item.qty}</span></span>
+        <span class="ofc-row__price">₹${item.price * item.qty}</span>
+      </div>`
+    ).join('');
+    summaryEl.innerHTML = `
+      <div class="ofc-title">Order Summary</div>
+      ${rows}
+      <div class="ofc-total">
+        <span>Total</span>
+        <span>₹${getCartSubtotal()}</span>
+      </div>`;
+  }
+
   document.getElementById('order-form-modal').style.display = 'flex';
+  activeModal = 'order';
+  setTimeout(() => document.getElementById('order-name-input').focus(), 80);
 }
 
 function closeOrderForm() {
   document.getElementById('order-form-modal').style.display = 'none';
+  if (activeModal === 'order') activeModal = null;
 }
 
 function submitOrder() {
   const name = document.getElementById('order-name-input').value.trim();
   const note = document.getElementById('order-note-input').value.trim();
-  if (!name) { document.getElementById('order-name-input').focus(); return; }
+  if (!name) {
+    const inp = document.getElementById('order-name-input');
+    inp.focus();
+    inp.style.borderColor = 'var(--red)';
+    setTimeout(() => { inp.style.borderColor = ''; }, 1800);
+    return;
+  }
 
-  // Build message
-  const lines = cart.map((item, i) =>
-    `${i + 1}. ${item.name} (${item.id}) × ${item.qty} — ₹${item.price * item.qty}`
+  const orderId   = generateOrderId();
+  const subtotal  = getCartSubtotal();
+  const snapshot  = cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty }));
+
+  // Build WA message — includes order ID so admin can match it
+  const lines = snapshot.map((item, i) =>
+    `${i + 1}. ${item.name} (${item.id}) \u00d7 ${item.qty} \u2014 \u20b9${item.price * item.qty}`
   );
-  const subtotal = getCartSubtotal();
-  let msg = `Hi! I'm ${name}.\nI'd like to order from Crafty Blooms:\n\n`;
+  let msg = `Hi! I'm ${name}.\nOrder ID: *${orderId}*\n\nItems:\n`;
   msg += lines.join('\n');
-  msg += `\n\nSubtotal: ₹${subtotal}`;
+  msg += `\n\nSubtotal: \u20b9${subtotal}`;
   if (note) msg += `\n\nNote: ${note}`;
   msg += `\n\nPlease confirm availability and share payment details. Thank you!`;
 
-  // Log order to localStorage (admin will read this)
-  logOrder(name, note);
+  // Log to localStorage BEFORE clearing cart (cart still populated here)
+  logOrder(orderId, name, note, snapshot, subtotal);
 
   // Open WhatsApp
-  const url = `https://wa.me/917030261766?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank', 'noopener');
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
 
+  // Clear cart AFTER logging
+  clearCart();
   closeOrderForm();
   closeCart();
-  if (typeof showToast === 'function') showToast('Order sent! We\'ll confirm on WhatsApp.');
+  if (typeof showToast === 'function') showToast(`\u2713 Order ${orderId} placed!`);
 }
 
-function logOrder(customerName, note) {
+function logOrder(orderId, customerName, note, itemsSnapshot, subtotal) {
   try {
     const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
-    const id = 'ORD-' + Date.now();
     orders.unshift({
-      id,
+      id: orderId,
       timestamp: new Date().toISOString(),
       customerName,
-      items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
-      subtotal: getCartSubtotal(),
+      items: itemsSnapshot,
+      subtotal,
       note: note || '',
+      adminNote: '',
       status: 'pending'
     });
     localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
