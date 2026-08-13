@@ -270,6 +270,8 @@ textarea { resize: vertical; }
 .action-btn--note:hover { border-color: var(--ink-500); color: var(--ink-900); }
 .action-btn--delete { background: transparent; color: var(--ink-300); border-color: var(--rule); }
 .action-btn--delete:hover { background: var(--red-bg); color: var(--red); border-color: #fecaca; }
+.action-btn--wa { background: #e7f9ef; color: #15803D; border-color: #a7f3d0; display: inline-flex; align-items: center; gap: 5px; }
+.action-btn--wa:hover { background: #dcfce7; }
 
 /* ══════════════════════════════════════════════
    NOTE MODAL
