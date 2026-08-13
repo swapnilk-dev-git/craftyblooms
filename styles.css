@@ -106,7 +106,31 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
   transition: background var(--ease), color var(--ease);
 }
 .header-icon-btn:hover { background: var(--bg-soft); }
-.header-icon-btn.active { color: var(--red); }
+.header-icon-btn.active {
+  color: var(--red);
+  background: rgba(200,16,46,0.08);
+  outline: 2px solid rgba(200,16,46,0.22);
+  outline-offset: 1px;
+}
+/* Edit mode banner — shows when edit mode is ON */
+body.edit-mode-on::after {
+  content: '✏  Edit Mode ON — hover cards to edit';
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--red);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 8px 20px;
+  border-radius: 20px;
+  z-index: 2000;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(200,16,46,0.3);
+}
 
 /* PDF button */
 .btn--pdf {

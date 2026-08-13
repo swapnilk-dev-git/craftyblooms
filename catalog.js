@@ -286,11 +286,15 @@ function renderCatalog() {
   const resultEl   = document.getElementById('search-results-count');
   if (resultEl) resultEl.textContent = (activeSearch || activeFilter !== 'all') ? `${totalShown} result${totalShown !== 1 ? 's' : ''}` : '';
 
-  // Edit mode button state
+  // Edit mode button — icon button, toggle .active class + tooltip only
   const editBtn = document.getElementById('edit-mode-btn');
-  if (editBtn) { editBtn.textContent = editMode ? '✓ Exit Edit Mode' : '✏ Edit Mode'; editBtn.classList.toggle('active', editMode); }
+  if (editBtn) {
+    editBtn.classList.toggle('active', editMode);
+    editBtn.title = editMode ? 'Exit Edit Mode (active)' : 'Edit Mode';
+  }
+  // Add Product button
   const addBtn = document.getElementById('add-product-btn');
-  if (addBtn) addBtn.style.display = editMode ? 'inline-flex' : 'none';
+  if (addBtn) addBtn.style.display = editMode ? 'flex' : 'none';
 
   // Trigger scroll animations
   initFadeIn();
@@ -300,6 +304,7 @@ function renderCatalog() {
 
 function toggleEditMode() {
   editMode = !editMode;
+  document.body.classList.toggle('edit-mode-on', editMode);
   renderCatalog();
 }
 
