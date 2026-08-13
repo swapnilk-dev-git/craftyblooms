@@ -151,6 +151,20 @@ textarea { resize: vertical; }
 .stat-card--rejected .stat-card__value { color: var(--red); }
 .stat-card--revenue  .stat-card__value { color: var(--green); font-size: 20px; }
 
+/* New-order notification badge on Pending stat card */
+.new-order-badge {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--red); color: #fff;
+  font-size: 10px; font-weight: 700; font-family: var(--font);
+  min-width: 18px; height: 18px; border-radius: 9px;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0 4px;
+  animation: badge-pulse 1s infinite;
+}
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.15); opacity: 0.85; }
+}
+
 /* ══════════════════════════════════════════════
    FILTER BAR
 ══════════════════════════════════════════════ */

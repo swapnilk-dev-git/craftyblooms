@@ -72,10 +72,57 @@ function logout() {
 
 let activeStatusFilter = 'all';
 let editingNoteId = null;
+let _lastSeenOrderCount = 0;  // track pending orders for new-order alert
 
 function init() {
   renderStats();
   renderOrders();
+  _lastSeenOrderCount = loadOrders().filter(o => o.status === 'pending').length;
+  startOrderPoller();
+}
+
+// ── NEW ORDER NOTIFICATION (polling localStorage every 10s) ────
+let _pollerTimer = null;
+
+function startOrderPoller() {
+  if (_pollerTimer) clearInterval(_pollerTimer);
+  _pollerTimer = setInterval(checkForNewOrders, 10000);
+  // Also listen for storage events (same tab write from catalog.js)
+  window.addEventListener('storage', e => {
+    if (e.key === ORDERS_KEY) checkForNewOrders();
+  });
+}
+
+function checkForNewOrders() {
+  const pending = loadOrders().filter(o => o.status === 'pending').length;
+  if (pending > _lastSeenOrderCount) {
+    const newCount = pending - _lastSeenOrderCount;
+    showNewOrderBadge(pending);
+    showToast(`🛒 ${newCount} new order${newCount > 1 ? 's' : ''} received!`);
+    // Browser notification if permitted
+    if (Notification && Notification.permission === 'granted') {
+      new Notification('Crafty Blooms — New Order!', {
+        body: `${newCount} new order${newCount > 1 ? 's' : ''} waiting. Open admin dashboard.`,
+        tag: 'cb-new-order'
+      });
+    }
+    renderStats();
+    renderOrders();
+  }
+  _lastSeenOrderCount = pending;
+}
+
+function showNewOrderBadge(count) {
+  const badge = document.getElementById('new-order-badge');
+  if (!badge) return;
+  badge.textContent = count;
+  badge.style.display = 'inline-flex';
+}
+
+function clearNewOrderBadge() {
+  const badge = document.getElementById('new-order-badge');
+  if (badge) badge.style.display = 'none';
+  _lastSeenOrderCount = loadOrders().filter(o => o.status === 'pending').length;
 }
 
 // Check auth on load
@@ -88,6 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem(AUTH_KEY) === '1') {
     document.getElementById('lock-screen').style.display = 'none';
     document.getElementById('dashboard').style.display   = 'block';
+    // Request browser notification permission silently
+    if (Notification && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
     init();
   }
 });
