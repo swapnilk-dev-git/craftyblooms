@@ -237,10 +237,23 @@ textarea { resize: vertical; }
 .order-total { font-size: 14px; font-weight: 700; color: var(--ink-900); }
 .order-total span { font-size: 11px; font-weight: 400; color: var(--ink-400); margin-right: 4px; }
 
+/* Shipping info block */
+.order-card__shipping {
+  padding: 8px 16px 4px;
+  border-top: 1px solid var(--rule);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.order-ship-row {
+  display: flex; gap: 10px; align-items: baseline; font-size: 12.5px;
+}
+.order-ship-label {
+  font-size: 11px; color: var(--ink-400); flex-shrink: 0; min-width: 70px;
+}
+
 .order-card__note {
-  padding: 0 16px 12px;
+  padding: 8px 16px 4px;
   font-size: 12px; color: var(--ink-500); font-style: italic;
-  border-top: 1px dashed var(--rule); padding-top: 8px; margin-top: -4px;
+  border-top: 1px dashed var(--rule);
 }
 .order-card__note strong { color: var(--ink-900); font-style: normal; }
 

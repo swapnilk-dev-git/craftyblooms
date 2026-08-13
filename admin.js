@@ -134,6 +134,13 @@ function buildOrderCard(order) {
       <span>₹${(item.price * item.qty).toLocaleString('en-IN')}</span>
     </div>`).join('');
 
+  // Shipping info block
+  const shipping = `
+    <div class="order-card__shipping">
+      ${order.phone   ? `<div class="order-ship-row"><span class="order-ship-label">📞 Phone</span><span>${escapeHtml(order.phone)}</span></div>` : ''}
+      ${order.address ? `<div class="order-ship-row"><span class="order-ship-label">📍 Address</span><span>${escapeHtml(order.address)}</span></div>` : ''}
+    </div>`;
+
   const note = order.note ? `
     <div class="order-card__note">
       <strong>Note:</strong> ${escapeHtml(order.note)}
@@ -158,6 +165,7 @@ function buildOrderCard(order) {
         <div class="order-card__time">${dateStr} · ${timeStr}</div>
       </div>
       <div class="order-card__items">${items}</div>
+      ${shipping}
       ${note}
       ${adminNote}
       <div class="order-card__footer">
@@ -262,19 +270,21 @@ function exportCSV() {
   const orders = loadOrders();
   if (orders.length === 0) { showToast('No orders to export.'); return; }
 
-  const header = ['Order ID', 'Date', 'Customer', 'Items', 'Subtotal', 'Status', 'Customer Note', 'Admin Note'];
+  const header = ['Order ID', 'Date', 'Customer', 'Phone', 'Address', 'Items', 'Subtotal', 'Status', 'Customer Note', 'Admin Note'];
   const rows = orders.map(o => {
-    const date = new Date(o.timestamp).toLocaleString('en-IN');
+    const date  = new Date(o.timestamp).toLocaleString('en-IN');
     const items = (o.items || []).map(i => `${i.name} x${i.qty}`).join(' | ');
     return [
       o.id,
       date,
       o.customerName || '',
+      o.phone        || '',
+      o.address      || '',
       items,
       o.subtotal || 0,
       o.status,
-      o.note || '',
-      o.adminNote || '',
+      o.note     || '',
+      o.adminNote|| '',
     ].map(csvEscape).join(',');
   });
 

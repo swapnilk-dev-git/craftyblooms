@@ -1114,8 +1114,57 @@ body.edit-mode-on::after {
 }
 .order-form__actions {
   display: flex; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--rule);
+  flex-wrap: wrap;
 }
-.order-form__submit { flex: 1; }
+.order-form__submit { flex: 1; min-width: 180px; }
+.req { color: var(--red); }
+
+/* Gift-wrap progress bar (inside cart drawer, above footer) */
+.giftwrap-progress {
+  padding: 10px 20px 0;
+}
+.giftwrap-progress__text {
+  font-size: 12px; color: var(--ink-500); margin-bottom: 6px;
+  line-height: 1.4;
+}
+.giftwrap-progress__text strong { color: var(--ink-900); }
+.giftwrap-progress__track {
+  height: 5px; background: var(--rule); border-radius: 3px; overflow: hidden;
+}
+.giftwrap-progress__bar {
+  height: 100%; background: var(--ink-900); border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.giftwrap--unlocked .giftwrap-progress__text { color: var(--green, #15803D); }
+.giftwrap--unlocked .giftwrap-progress__bar  { background: var(--green, #15803D); }
+
+/* Payment methods row in cart */
+.cart-payment-methods {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 6px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  margin-bottom: 4px;
+}
+.cart-payment__label { font-size: 11px; color: var(--ink-400); margin-right: 2px; }
+.cart-payment__pill {
+  font-size: 10.5px; font-weight: 500; color: var(--ink-700);
+  background: var(--bg-soft2); border: 1px solid var(--rule);
+  border-radius: 10px; padding: 2px 8px;
+}
+
+/* Stock status variants on product card CTA */
+.product-card__cta--soldout {
+  opacity: 0.5; cursor: not-allowed;
+  border-color: var(--rule); color: var(--ink-400);
+}
+.product-card__cta--soldout:hover { background: transparent; color: var(--ink-400); }
+.product-card__cta--mto {
+  border-color: var(--ink-400); color: var(--ink-500);
+}
+.product-card__cta--mto:hover { background: var(--ink-900); color: #fff; border-color: var(--ink-900); }
+
+/* Unit price in order form summary */
+.ofc-row__price-col { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.ofc-row__unit      { font-size: 10px; color: var(--ink-400); }
 
 /* ── FOOTER ADMIN LINK ── */
 .footer-admin-link {

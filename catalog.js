@@ -245,11 +245,30 @@ function renderCartItems() {
     </div>`).join('');
 
   if (subtotalEl) subtotalEl.textContent = `₹${getCartSubtotal()}`;
+
+  // Gift-wrap progress bar
+  const sub = getCartSubtotal();
+  const progressEl = document.getElementById('giftwrap-progress');
+  const progressBarEl = document.getElementById('giftwrap-bar');
+  const progressTextEl = document.getElementById('giftwrap-text');
+  if (progressEl) {
+    if (sub >= GIFTWRAP_THRESHOLD) {
+      progressTextEl.innerHTML = `🎁 <strong>Free gift wrapping unlocked!</strong>`;
+      progressBarEl.style.width = '100%';
+      progressEl.classList.add('giftwrap--unlocked');
+    } else {
+      const remaining = GIFTWRAP_THRESHOLD - sub;
+      progressTextEl.innerHTML = `Add <strong>₹${remaining}</strong> more for free gift wrapping 🎁`;
+      progressBarEl.style.width = `${Math.round((sub / GIFTWRAP_THRESHOLD) * 100)}%`;
+      progressEl.classList.remove('giftwrap--unlocked');
+    }
+    progressEl.style.display = cart.length > 0 ? 'block' : 'none';
+  }
 }
 
 // ── 5. ORDER CHECKOUT (name form → WA) ───────────────────────
 
-const WA_NUMBER = '918951436242'; // TEST number — change to 917030261766 for production
+const WA_NUMBER = '917030261766'; // Production WhatsApp number
 
 function generateOrderId() {
   try {
@@ -266,27 +285,31 @@ function generateOrderId() {
   }
 }
 
+const GIFTWRAP_THRESHOLD = 499;
+
 function openOrderForm() {
   if (cart.length === 0) { showToast('Your cart is empty!'); return; }
-  document.getElementById('order-name-input').value = '';
-  document.getElementById('order-note-input').value  = '';
+  document.getElementById('order-name-input').value    = '';
+  document.getElementById('order-phone-input').value   = '';
+  document.getElementById('order-address-input').value = '';
+  document.getElementById('order-note-input').value    = '';
 
-  // Populate cart summary in the modal
+  // Populate cart summary
   const summaryEl = document.getElementById('order-cart-summary');
   if (summaryEl) {
     const rows = cart.map(item =>
       `<div class="ofc-row">
         <span class="ofc-row__name">${item.name} <span class="ofc-row__qty">× ${item.qty}</span></span>
-        <span class="ofc-row__price">₹${item.price * item.qty}</span>
+        <span class="ofc-row__price-col">
+          <span class="ofc-row__unit">₹${item.price} each</span>
+          <span class="ofc-row__price">₹${item.price * item.qty}</span>
+        </span>
       </div>`
     ).join('');
     summaryEl.innerHTML = `
       <div class="ofc-title">Order Summary</div>
       ${rows}
-      <div class="ofc-total">
-        <span>Total</span>
-        <span>₹${getCartSubtotal()}</span>
-      </div>`;
+      <div class="ofc-total"><span>Total</span><span>₹${getCartSubtotal()}</span></div>`;
   }
 
   document.getElementById('order-form-modal').style.display = 'flex';
@@ -300,55 +323,69 @@ function closeOrderForm() {
 }
 
 function submitOrder() {
-  const name = document.getElementById('order-name-input').value.trim();
-  const note = document.getElementById('order-note-input').value.trim();
-  if (!name) {
-    const inp = document.getElementById('order-name-input');
-    inp.focus();
-    inp.style.borderColor = '#C8102E';
-    setTimeout(() => { inp.style.borderColor = ''; }, 1800);
-    return;
-  }
+  const name    = document.getElementById('order-name-input').value.trim();
+  const phone   = document.getElementById('order-phone-input').value.trim();
+  const address = document.getElementById('order-address-input').value.trim();
+  const note    = document.getElementById('order-note-input').value.trim();
 
-  const orderId   = generateOrderId();
-  const subtotal  = getCartSubtotal();
-  const snapshot  = cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty }));
+  // Validate required fields with red border on empties
+  const required = [
+    ['order-name-input',    name],
+    ['order-phone-input',   phone],
+    ['order-address-input', address],
+  ];
+  let firstInvalid = null;
+  required.forEach(([id, val]) => {
+    if (!val) {
+      firstInvalid = firstInvalid || id;
+      const el = document.getElementById(id);
+      el.style.borderColor = '#C8102E';
+      setTimeout(() => { el.style.borderColor = ''; }, 1800);
+    }
+  });
+  if (firstInvalid) { document.getElementById(firstInvalid).focus(); return; }
 
-  // Build WA message — includes order ID so admin can match it
+  const orderId  = generateOrderId();
+  const subtotal = getCartSubtotal();
+  const snapshot = cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty }));
+
+  // Build WA message with full shipping details
   const lines = snapshot.map((item, i) =>
-    `${i + 1}. ${item.name} (${item.id}) \u00d7 ${item.qty} \u2014 \u20b9${item.price * item.qty}`
+    `${i+1}. ${item.name} (${item.id}) \u00d7 ${item.qty} \u2014 \u20b9${item.price * item.qty}`
   );
-  let msg = `Hi! I'm ${name}.\nOrder ID: *${orderId}*\n\nItems:\n`;
-  msg += lines.join('\n');
-  msg += `\n\nSubtotal: \u20b9${subtotal}`;
-  if (note) msg += `\n\nNote: ${note}`;
+  let msg  = `Hi! I'm ${name}.\nOrder ID: *${orderId}*\n\n`;
+  msg += `Items:\n${lines.join('\n')}\n`;
+  msg += `\nSubtotal: \u20b9${subtotal}\n`;
+  msg += `\n\uD83D\uDCDE Phone: ${phone}`;
+  msg += `\n\uD83D\uDCCD Address: ${address}`;
+  if (note) msg += `\n\uD83D\uDCDD Note: ${note}`;
   msg += `\n\nPlease confirm availability and share payment details. Thank you!`;
 
-  // Log to localStorage BEFORE clearing cart (cart still populated here)
-  logOrder(orderId, name, note, snapshot, subtotal);
+  // Log BEFORE clearing cart
+  logOrder(orderId, name, phone, address, note, snapshot, subtotal);
 
-  // Open WhatsApp
   window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
 
-  // Clear cart AFTER logging
   clearCart();
   closeOrderForm();
   closeCart();
   if (typeof showToast === 'function') showToast(`\u2713 Order ${orderId} placed!`);
 }
 
-function logOrder(orderId, customerName, note, itemsSnapshot, subtotal) {
+function logOrder(orderId, customerName, phone, address, note, itemsSnapshot, subtotal) {
   try {
     const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
     orders.unshift({
       id: orderId,
       timestamp: new Date().toISOString(),
       customerName,
-      items: itemsSnapshot,
+      phone:     phone   || '',
+      address:   address || '',
+      items:     itemsSnapshot,
       subtotal,
-      note: note || '',
+      note:      note    || '',
       adminNote: '',
-      status: 'pending'
+      status:    'pending'
     });
     localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
   } catch(e) { console.warn('Order logging failed:', e); }
@@ -433,10 +470,14 @@ function buildCardHTML(p) {
           ${p.mrp && p.mrp > p.price ? `<span class="product-card__mrp">₹${p.mrp}</span>` : ''}
           <span class="product-card__price">₹${p.price}</span>
         </div>
-        <button class="product-card__cta" data-id="${p.id}"
-                onclick="event.stopPropagation();addToCart('${p.id}')">
-          Add to Cart
-        </button>
+        ${p.stock === 'sold_out'
+          ? `<button class="product-card__cta product-card__cta--soldout" disabled>Sold Out</button>`
+          : p.stock === 'made_to_order'
+            ? `<button class="product-card__cta product-card__cta--mto" data-id="${p.id}"
+                       onclick="event.stopPropagation();addToCart('${p.id}')">Made to Order</button>`
+            : `<button class="product-card__cta" data-id="${p.id}"
+                       onclick="event.stopPropagation();addToCart('${p.id}')">Add to Cart</button>`
+        }
         <div class="product-card__footer">
           <span class="product-card__sku">${p.id}</span>
           <button class="card-qv-btn" onclick="event.stopPropagation();openQuickView('${p.id}')" title="Quick View">
@@ -902,6 +943,8 @@ function openProductEditor(productId) {
   document.getElementById('editor-mrp').value            = p ? (p.mrp||'')    : 399;
   document.getElementById('editor-desc').value           = p ? (p.description||'') : '';
   document.getElementById('editor-featured').checked     = p ? !!p.featured   : false;
+  const stockEl = document.getElementById('editor-stock');
+  if (stockEl) stockEl.value = p ? (p.stock || 'available') : 'available';
   document.getElementById('editor-delete-btn').style.display = p ? 'inline-flex' : 'none';
 
   renderEditorImageList(p ? p.files : []);
@@ -986,18 +1029,20 @@ function saveProductForm() {
   const mrp      = parseInt(document.getElementById('editor-mrp').value)||0;
   const desc     = document.getElementById('editor-desc').value.trim();
   const featured = document.getElementById('editor-featured').checked;
+  const stockEl  = document.getElementById('editor-stock');
+  const stock    = stockEl ? stockEl.value : 'available';
 
   if (!name)  { alert('Please enter a product name.'); return; }
   if (!price) { alert('Please enter a price.'); return; }
 
   const existing = products.find(p => p.id === editingProductId);
   if (existing) {
-    Object.assign(existing, { name, category, price, mrp, description:desc, featured });
+    Object.assign(existing, { name, category, price, mrp, description:desc, featured, stock });
   } else {
     const imgs = [window._pendingImageDataUrl, ...(window._pendingExtraImages||[])].filter(Boolean);
     window._pendingImageDataUrl = null;
     window._pendingExtraImages  = null;
-    products.push({ id, files:imgs, name, category, price, mrp, description:desc, featured, cropX:null,cropY:null,cropW:null,cropH:null });
+    products.push({ id, files:imgs, name, category, price, mrp, description:desc, featured, stock, cropX:null,cropY:null,cropW:null,cropH:null });
   }
   saveProducts(products);
   renderCatalog();
