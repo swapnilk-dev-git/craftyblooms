@@ -1,0 +1,394 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Crafty Blooms — Project Reference</title>
+<style>
+  :root {
+    --ink: #1a1a1a; --ink2: #444; --ink3: #888;
+    --rule: #e4e0db; --bg: #fff; --bg2: #f8f6f3; --bg3: #f2ede8;
+    --red: #c8102e; --green: #15803d; --amber: #d97706; --blue: #1d4ed8;
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg2); color: var(--ink); font-size: 14px; line-height: 1.6; padding: 32px 24px 64px; }
+  .page { max-width: 960px; margin: 0 auto; }
+
+  /* HEADER */
+  .hero { background: var(--ink); color: #fff; border-radius: 10px; padding: 28px 32px 24px; margin-bottom: 28px; }
+  .hero h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+  .hero p  { font-size: 13px; color: #aaa; margin-top: 4px; }
+  .hero-links { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  .hero-links a { display: inline-block; padding: 7px 16px; border-radius: 5px; font-size: 12px; font-weight: 600; text-decoration: none; }
+  .link--store { background: #fff; color: var(--ink); }
+  .link--admin { background: #3b3b3b; color: #fff; border: 1px solid #555; }
+  .link--github { background: #24292e; color: #fff; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; vertical-align: middle; }
+  .badge--green { background: #dcfce7; color: var(--green); }
+  .badge--red   { background: #fee2e2; color: var(--red); }
+  .badge--amber { background: #fef3c7; color: var(--amber); }
+  .badge--blue  { background: #dbeafe; color: var(--blue); }
+  .badge--grey  { background: #f1f1f1; color: #555; }
+
+  /* SECTIONS */
+  section { background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+  .sec-head { background: var(--bg3); padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--rule); }
+  .sec-head h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--ink2); }
+  .sec-body { padding: 18px 20px; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 7px 10px; background: var(--bg3); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--ink3); border-bottom: 1px solid var(--rule); }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafaf9; }
+
+  /* CODE */
+  code { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; background: #f4f1ee; padding: 1px 5px; border-radius: 3px; color: #c0392b; }
+  pre  { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; overflow-x: auto; line-height: 1.6; }
+  .kw { color: #569cd6; } .str { color: #ce9178; } .cm { color: #6a9955; } .val { color: #b5cea8; }
+
+  /* MISC */
+  ul.plain { list-style: none; padding: 0; }
+  ul.plain li { padding: 4px 0; border-bottom: 1px solid var(--rule); font-size: 13px; }
+  ul.plain li:last-child { border-bottom: none; }
+  .check { color: var(--green); font-weight: 700; }
+  .cross { color: var(--red); font-weight: 700; }
+  .dot-amber { color: var(--amber); font-weight: 700; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  .info-card { background: var(--bg2); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+  .info-card h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ink3); letter-spacing: 0.5px; margin-bottom: 8px; }
+  .info-card p, .info-card code { font-size: 13px; }
+  .step { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+  .step:last-child { border-bottom: none; }
+  .step-num { background: var(--ink); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 5px; padding: 10px 14px; font-size: 12.5px; color: #92400e; margin-top: 10px; }
+  .note strong { color: #78350f; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="hero">
+    <h1>🌸 Crafty Blooms — Project Reference</h1>
+    <p>Complete technical reference · Last updated: August 2026 · Status: Production Live</p>
+    <div class="hero-links">
+      <a class="link--store" href="https://swapnilk-dev-git.github.io/craftyblooms" target="_blank">🛍 Live Store ↗</a>
+      <a class="link--admin" href="https://swapnilk-dev-git.github.io/craftyblooms/admin.html" target="_blank">⚙ Admin Dashboard ↗</a>
+      <a class="link--github" href="https://github.com/swapnilk-dev-git/craftyblooms" target="_blank">GitHub Repo ↗</a>
+    </div>
+  </div>
+
+  
+  <section>
+    <div class="sec-head"><h2>🏷 Brand &amp; Contacts</h2></div>
+    <div class="sec-body">
+      <div class="grid3">
+        <div class="info-card">
+          <h3>Brand</h3>
+          <p><strong>Crafty Blooms</strong><br />Tagline: <em>"Handcrafted with Love"</em><br />Products: Chenille stem / pipe-cleaner flowers, toys &amp; animals</p>
+        </div>
+        <div class="info-card">
+          <h3>Production Contact</h3>
+          <p>📞 WhatsApp: <code>+91-7030261766</code><br />WA number (no +): <code>917030261766</code><br />Instagram: <code>@craftyblooms</code></p>
+        </div>
+        <div class="info-card">
+          <h3>⚠️ Test Number (DO NOT use in production)</h3>
+          <p><code>8951436242</code> — was used during dev, now replaced everywhere with <code>917030261766</code></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>📁 File Structure</h2></div>
+    <div class="sec-body">
+      <table>
+        <tr><th>File</th><th>Purpose</th><th>Size</th></tr>
+        <tr><td><code>Website/index.html</code></td><td>Full catalog HTML — announcement bar, header (edit/exit/cart/PDF), nav, hero, toolbar (search+filter+sort), product grid (flowers + toys sections), footer, Quick View modal, cart drawer, order form modal, crop modal, editor drawer, mobile cart bar, toast. Loads jsPDF + html2canvas CDN for PDF export.</td><td>~29 KB</td></tr>
+        <tr><td><code>Website/styles.css</code></td><td>All catalog CSS — design tokens (Jost, --red, --green, --amber, --wa, --bg-soft2), header, nav, hero, trust strip, toolbar, section headers, 4-col product grid, product cards + badges + CTA variants (sold-out, made-to-order), card qty stepper (.card-qty-row/.card-qty-wrap/.card-qty-btn/.card-qty-val), cart drawer, gift-wrap progress bar, payment pills, order form, QV modal, crop modal, editor drawer, toast, mobile cart bar, responsive breakpoints (860px, 600px)</td><td>~44 KB</td></tr>
+        <tr><td><code>Website/catalog.js</code></td><td>All catalog JS — DEFAULT_PRODUCTS (46 items), data layer, cart system, order checkout → WhatsApp, edit mode (admin-gated), product card rendering + qty stepper functions (cardQtyChange / cardAddToCart / addToCartWithQty), slideshow, Quick View, magnifier, crop, PDF export, search/filter/sort, DOMContentLoaded bootstrap</td><td>~64 KB</td></tr>
+        <tr><td><code>Website/admin.html</code></td><td>Admin dashboard HTML — PIN lock screen, dashboard header (← Store / ✏ Edit Store / ⬇ CSV / Logout), stats row (Total/Pending🔴/Accepted/Rejected/Revenue), filter bar, orders list, note modal. Pending card has pulsing new-order badge.</td><td>~6 KB</td></tr>
+        <tr><td><code>Website/admin.css</code></td><td>Admin styles — lock screen, header, stat cards, new-order badge animation (.new-order-badge + @keyframes badge-pulse), filter bar, order cards, action buttons (.action-btn--accept/reject/note/delete/wa), note modal, adm-toast, responsive</td><td>~16 KB</td></tr>
+        <tr><td><code>Website/admin.js</code></td><td>Admin JS — brute-force lockout (3 tries → 5 min, LOCKOUT_KEY), init, order poller (10s interval + storage event), checkForNewOrders, showNewOrderBadge/clearNewOrderBadge, renderStats/renderOrders, buildOrderCard, acceptOrder/rejectOrder (auto-prompt WA), sendWAConfirmation (3 message templates: accepted/rejected/pending), deleteOrder/confirmClearAll, note modal, exportCSV, escapeHtml, showToast</td><td>~19 KB</td></tr>
+        <tr><td><code>Website/Images/</code></td><td>27 Flower images (<code>Flower.jpeg</code>, <code>Flower (1).jpeg</code> … <code>Flower (26).jpeg</code>) + 19 Toys images (<code>Toys (1).jpeg</code> … <code>Toys (19).jpeg</code>). Served via relative path — no server needed.</td><td>46 files</td></tr>
+      </table>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>🔑 Constants &amp; LocalStorage Keys</h2></div>
+    <div class="sec-body">
+      <div class="grid2">
+        <div>
+          <h3 style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">catalog.js</h3>
+          <table>
+            <tr><th>Constant</th><th>Value</th></tr>
+            <tr><td><code>WA_NUMBER</code></td><td><code>'917030261766'</code> — production</td></tr>
+            <tr><td><code>STORAGE_KEY</code></td><td><code>'craftyblooms_products_v2'</code></td></tr>
+            <tr><td><code>CART_KEY</code></td><td><code>'craftyblooms_cart_v1'</code></td></tr>
+            <tr><td><code>ORDERS_KEY</code></td><td><code>'craftyblooms_orders_v1'</code></td></tr>
+            <tr><td><code>ADMIN_AUTH_KEY</code></td><td><code>'cb_admin_auth_v1'</code></td></tr>
+            <tr><td><code>GIFTWRAP_THRESHOLD</code></td><td><code>499</code> (₹, line 312)</td></tr>
+          </table>
+        </div>
+        <div>
+          <h3 style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">admin.js</h3>
+          <table>
+            <tr><th>Constant</th><th>Value</th></tr>
+            <tr><td><code>ADMIN_PIN</code></td><td><code>'1234'</code> — line 6, change here</td></tr>
+            <tr><td><code>AUTH_KEY</code></td><td><code>'cb_admin_auth_v1'</code></td></tr>
+            <tr><td><code>ORDERS_KEY</code></td><td><code>'craftyblooms_orders_v1'</code></td></tr>
+            <tr><td><code>LOCKOUT_KEY</code></td><td><code>'cb_admin_lockout_v1'</code></td></tr>
+            <tr><td><code>MAX_ATTEMPTS</code></td><td><code>3</code></td></tr>
+            <tr><td><code>LOCKOUT_MS</code></td><td><code>300000</code> (5 min)</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>📐 Data Schemas (localStorage)</h2></div>
+    <div class="sec-body">
+      <div class="grid2">
+        <div>
+          <p style="font-size:12px;font-weight:600;color:var(--ink3);text-transform:uppercase;margin-bottom:8px">Product (<code>craftyblooms_products_v2</code>)</p>
+          <pre><span class="kw">{</span>
+  id:          <span class="str">"FL-001"</span>,          <span class="cm">// FL-XXX or TY-XXX</span>
+  name:        <span class="str">"Pearl Bloom Pot"</span>,
+  category:    <span class="str">"flowers"</span>,         <span class="cm">// or "toys"</span>
+  price:       <span class="val">349</span>,               <span class="cm">// selling price ₹</span>
+  mrp:         <span class="val">499</span>,               <span class="cm">// strike-through MRP</span>
+  description: <span class="str">"…"</span>,
+  featured:    <span class="kw">true</span>,
+  stock:       <span class="str">"available"</span>,       <span class="cm">// "available" | "made_to_order" | "sold_out"</span>
+  files:       [<span class="str">"Images/Flower.jpeg"</span>], <span class="cm">// array of image paths</span>
+  cropX,cropY,cropW,cropH: <span class="kw">null</span>    <span class="cm">// set by crop tool</span>
+<span class="kw">}</span></pre>
+        </div>
+        <div>
+          <p style="font-size:12px;font-weight:600;color:var(--ink3);text-transform:uppercase;margin-bottom:8px">Order (<code>craftyblooms_orders_v1</code>)</p>
+          <pre><span class="kw">{</span>
+  id:           <span class="str">"ORD-20260813-001"</span>,
+  timestamp:    <span class="str">"ISO string"</span>,
+  customerName: <span class="str">"Priya"</span>,
+  phone:        <span class="str">"9876543210"</span>,
+  address:      <span class="str">"Full delivery address"</span>,
+  items: [<span class="kw">{</span>
+    id:    <span class="str">"FL-001"</span>,
+    name:  <span class="str">"Pearl Bloom Pot"</span>,
+    price: <span class="val">349</span>,
+    qty:   <span class="val">2</span>
+  <span class="kw">}</span>],
+  subtotal:  <span class="val">698</span>,
+  note:      <span class="str">""</span>,        <span class="cm">// optional customer note</span>
+  adminNote: <span class="str">""</span>,        <span class="cm">// written by admin</span>
+  status:    <span class="str">"pending"</span>  <span class="cm">// "pending"|"accepted"|"rejected"</span>
+<span class="kw">}</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>✅ Completed Features</h2></div>
+    <div class="sec-body">
+      <div class="grid2">
+        <div>
+          <p style="font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;margin-bottom:8px">Catalog / Store</p>
+          <ul class="plain">
+            <li><span class="check">✓</span> Announcement bar (WA link → production #)</li>
+            <li><span class="check">✓</span> Header: edit btn (admin-gated), exit-edit btn, cart icon+badge, PDF btn</li>
+            <li><span class="check">✓</span> Nav: Flowers / Toys / All / Custom Orders / Contact</li>
+            <li><span class="check">✓</span> Hero section + trust strip</li>
+            <li><span class="check">✓</span> Search bar + filter pills (All/Flowers/Toys) + sort dropdown</li>
+            <li><span class="check">✓</span> 4-col product grid, section headers</li>
+            <li><span class="check">✓</span> Product cards: image, % OFF badge, Featured badge, SKU</li>
+            <li><span class="check">✓</span> <strong>Qty stepper on cards</strong> (− 1 + → Add to Cart)</li>
+            <li><span class="check">✓</span> Card CTA variants: Add to Cart / Made to Order / Sold Out (disabled)</li>
+            <li><span class="check">✓</span> Multi-image hover slideshow (1.2s, dot indicators)</li>
+            <li><span class="check">✓</span> Quick View modal (gallery, prev/next, thumbnail strip, play/pause, Add to Cart)</li>
+            <li><span class="check">✓</span> Image magnifier (2.5× zoom lens, desktop ≥900px only)</li>
+            <li><span class="check">✓</span> Scroll fade-in animations (IntersectionObserver, staggered)</li>
+            <li><span class="check">✓</span> Cart drawer (slide-in right, full-width on mobile)</li>
+            <li><span class="check">✓</span> Gift-wrap progress bar (₹499 threshold, turns green)</li>
+            <li><span class="check">✓</span> Payment pills: UPI · Bank Transfer · Partial COD</li>
+            <li><span class="check">✓</span> Mobile sticky cart bar (fixed bottom, count + total)</li>
+            <li><span class="check">✓</span> Cart badge (red, pops on add)</li>
+            <li><span class="check">✓</span> Order form modal (Name / Phone / Address / Note + cart summary + total)</li>
+            <li><span class="check">✓</span> Order → WhatsApp message with Order ID, items, phone, address, note</li>
+            <li><span class="check">✓</span> Sequential Order IDs: <code>ORD-YYYYMMDD-NNN</code></li>
+            <li><span class="check">✓</span> Orders logged to localStorage BEFORE cart cleared</li>
+            <li><span class="check">✓</span> PDF catalog export (jsPDF + html2canvas): cover + section dividers + 6-per-page grid + back cover</li>
+            <li><span class="check">✓</span> Footer: Shop / Good to Know columns, WA + IG social links, dynamic © year</li>
+            <li><span class="check">✓</span> SEO: OG / Twitter Card / canonical meta tags</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;margin-bottom:8px">Admin &amp; Edit Mode</p>
+          <ul class="plain">
+            <li><span class="check">✓</span> Admin PIN lock screen (PIN: <code>1234</code>)</li>
+            <li><span class="check">✓</span> <strong>Brute-force lockout</strong>: 3 wrong attempts → 5 min lock, countdown in error message</li>
+            <li><span class="check">✓</span> Stats row: Total / Pending / Accepted / Rejected / Revenue</li>
+            <li><span class="check">✓</span> <strong>New-order pulsing badge</strong> on Pending card + browser push Notification</li>
+            <li><span class="check">✓</span> 10-second localStorage poller + storage event listener for new orders</li>
+            <li><span class="check">✓</span> Order cards: ID, customer, items, phone, address, note, status badge</li>
+            <li><span class="check">✓</span> Filter pills: All / Pending / Accepted / Rejected</li>
+            <li><span class="check">✓</span> Accept ✅ / Reject ❌ with auto-prompt to send WA confirmation</li>
+            <li><span class="check">✓</span> <strong>Send WA Confirmation</strong> green button on each order (3 message templates: accepted / rejected / pending)</li>
+            <li><span class="check">✓</span> Phone normalisation: strips +/spaces, prepends 91 for 10-digit numbers</li>
+            <li><span class="check">✓</span> Admin notes (modal) + internal admin note field</li>
+            <li><span class="check">✓</span> Delete order (with confirm) + Clear All orders</li>
+            <li><span class="check">✓</span> CSV export (ID/Date/Customer/Phone/Address/Items/Subtotal/Status/CustomerNote/AdminNote)</li>
+            <li><span class="check">✓</span> "Edit Store" → opens <code>index.html?edit=1</code> (auto-enters edit mode)</li>
+            <li><span class="check">✓</span> Edit mode auth-gated (pencil hidden from visitors, shown only when <code>cb_admin_auth_v1='1'</code>)</li>
+            <li><span class="check">✓</span> Product editor drawer: name, category, price, MRP, description, featured toggle, stock select, multi-image upload, delete</li>
+            <li><span class="check">✓</span> Add new product form</li>
+            <li><span class="check">✓</span> Crop tool modal: drag/resize crop box, saves cropX/Y/W/H to localStorage</li>
+            <li><span class="check">✓</span> Stock select: Available / Made to Order / Sold Out</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>🚀 Deploy Process (GitHub Pages)</h2></div>
+    <div class="sec-body">
+      <div class="note"><strong>⚠️ Critical:</strong> Always use <code>--rejoin</code> before the second split call to bust the stale hash cache. Reusing a branch name points to an old hash and the push silently does nothing. Always push the raw commit hash directly.</div>
+      <br />
+      <pre><span class="cm"># Standard deploy workflow (run from BOB root: C:\Users\000I7A744\Desktop\BOB)</span>
+git add Website/<span class="str">&lt;changed files&gt;</span>
+git commit -m <span class="str">"feat/fix: description"</span>
+
+<span class="cm"># Bust the subtree cache, then split and push by hash</span>
+git subtree split --prefix=Website HEAD --rejoin <span class="val">2</span>&gt;&amp;<span class="val">1</span> | Out-Null
+$hash = git subtree split --prefix=Website HEAD
+git push craftyblooms <span class="str">"${hash}:refs/heads/main"</span> --force</pre>
+      <div class="note" style="margin-top:12px"><strong>Remotes:</strong> <code>origin</code> → BOB monorepo  |  <code>craftyblooms</code> → <code>https://github.com/swapnilk-dev-git/craftyblooms.git</code> (GitHub Pages source)</div>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>📋 Git Commit History</h2></div>
+    <div class="sec-body">
+      <table>
+        <tr><th>Hash</th><th>Description</th></tr>
+        <tr><td><code>8f2c4a5</code></td><td><span class="badge badge--blue">FIX</span> Orders not appearing in admin — visibilitychange auto-refresh, manual Refresh btn, surface logOrder errors to user; add e2e-test.html</td></tr>
+        <tr><td><code>fde5a1b</code></td><td><span class="badge badge--green">FEAT</span> Admin new-order notification badge (pulsing) + browser Notification API + 10s localStorage poller</td></tr>
+        <tr><td><code>ee7199c</code></td><td><span class="badge badge--green">FEAT</span> Qty stepper on product cards (− 1 + then Add to Cart); fix flashCartBtn text for MTO items</td></tr>
+        <tr><td><code>f3b7598</code></td><td><span class="badge badge--green">FEAT</span> Admin PIN brute-force lockout (3 attempts → 5 min lockout, countdown timer in error msg)</td></tr>
+        <tr><td><code>689783e</code></td><td><span class="badge badge--blue">FIX</span> Replace test WA number with production +91-7030261766 across all links; add OG/Twitter meta + canonical SEO tags</td></tr>
+        <tr><td><code>23a1822</code></td><td><span class="badge badge--green">FEAT</span> Add .action-btn--wa CSS + sendWAConfirmation feature</td></tr>
+        <tr><td><code>cb33609</code></td><td><span class="badge badge--blue">FIX</span> Phone+address in orders, production WA#, stock toggle, gift-wrap bar, payment pills, unit prices, dynamic year, admin shipping display, CSV export columns</td></tr>
+        <tr><td><code>437b844</code></td><td><span class="badge badge--green">FEAT</span> Gate edit mode behind admin auth, Edit Store button in admin, Exit Edit Mode button</td></tr>
+        <tr><td><code>0504fd9</code></td><td><span class="badge badge--blue">FIX</span> Inline border color CSS var, log order errors to console</td></tr>
+        <tr><td><code>d123d11</code></td><td><span class="badge badge--blue">FIX</span> Test WA number, sequential order IDs, cart summary in order form, cart cleared after order, activeModal for Escape key</td></tr>
+        <tr><td><code>a228f24</code></td><td><span class="badge badge--green">FEAT</span> Cart drawer, WhatsApp multi-order, admin dashboard (v3)</td></tr>
+        <tr><td><code>02abd8c</code></td><td><span class="badge badge--blue">FIX</span> Add missing qv-playpause CSS for Quick View auto-slideshow</td></tr>
+        <tr><td><code>b3cc877</code></td><td><span class="badge badge--blue">FIX</span> Edit mode button UI + active banner indicator</td></tr>
+        <tr><td><code>6791e85</code></td><td><span class="badge badge--grey">INIT</span> First commit</td></tr>
+      </table>
+      <p style="font-size:12px;color:var(--ink3);margin-top:10px">Last deployed subtree hash: <code>5aaa75d5cd4f535ce28d821ba00fc88849fa8fb4</code></p>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>⚠️ Known Limitations &amp; Gotchas</h2></div>
+    <div class="sec-body">
+      <table>
+        <tr><th>#</th><th>Issue</th><th>Workaround / Notes</th></tr>
+        <tr><td>1</td><td><strong>Cross-device order sync</strong> — localStorage is siloed per browser/device. Orders on customer's phone won't appear in admin on a different device.</td><td>The WA message itself is the order receipt. Admin reads from WA. Fix: Google Sheets + Apps Script backend (not yet built).</td></tr>
+        <tr><td>2</td><td><strong>Subtree split cache</strong> — reusing a branch name re-points to old hash, push is a no-op.</td><td>Always use <code>--rejoin</code> flag + push raw hash. Never reuse branch names.</td></tr>
+        <tr><td>3</td><td><strong>CSS custom properties in inline styles</strong> — <code>var(--red)</code> doesn't work in <code>element.style.borderColor</code></td><td>Use hardcoded hex <code>#C8102E</code> in JS for inline border colors.</td></tr>
+        <tr><td>4</td><td><strong>localStorage 5MB limit</strong> — base64 uploaded images (via product editor) fill it fast.</td><td>Use relative <code>Images/</code> paths for default products. Only upload small images via editor.</td></tr>
+        <tr><td>5</td><td><strong>No WhatsApp API for sending to customers</strong> — cannot send programmatically without Meta Business API approval.</td><td>Admin uses "Send Confirmation" button which pre-fills a WA message the admin sends manually.</td></tr>
+        <tr><td>6</td><td><strong>New-order notification poller is same-device only</strong> — storage events only fire cross-tab on same device.</td><td>Works fine if admin dashboard is open on same device/browser as store. Cross-device needs backend.</td></tr>
+        <tr><td>7</td><td><strong>GIFTWRAP_THRESHOLD</strong> must be declared before <code>openOrderForm()</code></td><td>Declared at line 312 in catalog.js — do not move it below line ~340.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>📋 Remaining / Not Yet Built</h2></div>
+    <div class="sec-body">
+      <table>
+        <tr><th>Priority</th><th>Feature</th><th>Notes</th></tr>
+        <tr><td><span class="badge badge--red">High</span></td><td><strong>Cross-device order sync</strong></td><td>Google Sheets + Apps Script backend. Orders POSTed to Apps Script URL, admin reads from sheet.</td></tr>
+        <tr><td><span class="badge badge--amber">Medium</span></td><td><strong>Product deep-linking</strong></td><td>URL like <code>?product=FL-001</code> auto-opens Quick View for that product.</td></tr>
+        <tr><td><span class="badge badge--amber">Medium</span></td><td><strong>Custom Order Form page</strong></td><td>Structured form (type / qty / colour / size / occasion) that generates a formatted WA message. Nav "Custom Orders" currently links to raw WA chat.</td></tr>
+        <tr><td><span class="badge badge--grey">Low</span></td><td>Recently Viewed / You may also like</td><td>UX enhancement using localStorage browsing history.</td></tr>
+        <tr><td><span class="badge badge--grey">Low</span></td><td>Wishlist / save-for-later</td><td>Heart icon on cards, localStorage wishlist.</td></tr>
+        <tr><td><span class="badge badge--grey">Low</span></td><td>Instagram feed embed</td><td>Social proof section using Instagram oEmbed or screenshot grid.</td></tr>
+        <tr><td><span class="badge badge--grey">Low</span></td><td>Image optimisation</td><td>Convert JPEGs to WebP, compress. Currently served as raw camera JPEGs.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>🎨 Design Tokens &amp; Stack</h2></div>
+    <div class="sec-body">
+      <div class="grid3">
+        <div class="info-card">
+          <h3>Typography</h3>
+          <p>Font: <strong>Jost</strong> (Google Fonts)<br />Weights: 300, 400, 500, 600, 700<br />Design ref: <a href="https://afzaai.in/collections/single-pipe-cleaner-flowers" target="_blank">afzaai.in ↗</a></p>
+        </div>
+        <div class="info-card">
+          <h3>Key Colours</h3>
+          <p><code>--red: #C8102E</code><br /><code>--green: #15803D</code><br /><code>--amber: #D97706</code><br /><code>--ink-900: #1A1A1A</code><br /><code>--bg-soft: #F7F5F2</code></p>
+        </div>
+        <div class="info-card">
+          <h3>Tech Stack</h3>
+          <p>Plain HTML + CSS + JS<br />No framework, no build step<br />Opens by double-clicking <code>index.html</code><br />jsPDF 2.5.1 + html2canvas 1.4.1 (CDN)<br />Hosted: GitHub Pages</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>🔐 Admin Flow</h2></div>
+    <div class="sec-body">
+      <div class="step"><div class="step-num">1</div><div>Open <code>admin.html</code> → enter PIN <code>1234</code> → locked out after 3 wrong attempts for 5 minutes.</div></div>
+      <div class="step"><div class="step-num">2</div><div>Dashboard shows stats. Pulsing red badge on "Pending" card when new orders arrive.</div></div>
+      <div class="step"><div class="step-num">3</div><div>Accept ✅ or Reject ❌ an order → auto-prompt to send WA confirmation to customer.</div></div>
+      <div class="step"><div class="step-num">4</div><div>Green "📲 WhatsApp" button on each order → pre-fills message with order details + status. Admin taps Send.</div></div>
+      <div class="step"><div class="step-num">5</div><div>Add internal admin notes. Export all orders as CSV. Delete individual or clear all orders.</div></div>
+      <div class="step"><div class="step-num">6</div><div>Click "✏ Edit Store" → opens <code>index.html?edit=1</code> → catalog auto-enters admin edit mode.</div></div>
+      <div class="step"><div class="step-num">7</div><div>In edit mode: hover any card → ✂ Crop / ✏ Edit buttons appear. Edit drawer: name/price/MRP/desc/featured/stock/images. Add new products with + button. Exit with red ✕ button.</div></div>
+    </div>
+  </section>
+
+  
+  <section>
+    <div class="sec-head"><h2>🛍 Customer Order Flow</h2></div>
+    <div class="sec-body">
+      <div class="step"><div class="step-num">1</div><div>Browse catalog → use qty stepper (− 1 +) on card → click "Add to Cart"</div></div>
+      <div class="step"><div class="step-num">2</div><div>Cart drawer opens (or tap bottom bar) → review items, qty steppers, gift-wrap progress bar</div></div>
+      <div class="step"><div class="step-num">3</div><div>Click "Place Order" → fill Name + Phone + Delivery Address (+ optional note) → cart summary shown</div></div>
+      <div class="step"><div class="step-num">4</div><div>Submit → Order logged to localStorage → WhatsApp opens with pre-filled order message to <code>+91-7030261766</code></div></div>
+      <div class="step"><div class="step-num">5</div><div>Admin sees order card → Accepts/Rejects → sends WA confirmation back to customer</div></div>
+    </div>
+  </section>
+
+  <div style="text-align:center;color:var(--ink3);font-size:12px;margin-top:32px">
+    Crafty Blooms · Handcrafted with Love · Generated August 2026
+  </div>
+
+</div>
+</body>
+</html>
