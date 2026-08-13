@@ -305,7 +305,7 @@ function submitOrder() {
   if (!name) {
     const inp = document.getElementById('order-name-input');
     inp.focus();
-    inp.style.borderColor = 'var(--red)';
+    inp.style.borderColor = '#C8102E';
     setTimeout(() => { inp.style.borderColor = ''; }, 1800);
     return;
   }
@@ -351,7 +351,7 @@ function logOrder(orderId, customerName, note, itemsSnapshot, subtotal) {
       status: 'pending'
     });
     localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-  } catch(e) { /* silent */ }
+  } catch(e) { console.warn('Order logging failed:', e); }
 }
 
 // ── 6. STATE ─────────────────────────────────────────────────
