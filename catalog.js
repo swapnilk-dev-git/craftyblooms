@@ -1,12 +1,9 @@
 /* ============================================================
-   Crafty Blooms — Catalog JS  v2
+   Crafty Blooms — Catalog JS  v3
    Handcrafted with Love | +91-7030261766 | @craftyblooms
    ============================================================ */
 
 // ── 1. DEFAULT PRODUCT DATA ───────────────────────────────────
-// files[] — first entry is the hero image shown on the card.
-// Add more paths/data-URLs to enable the hover slideshow.
-
 const DEFAULT_PRODUCTS = [
   // ── FLOWERS (27) ──
   { id:'FL-001', files:['Images/Flower.jpeg'],       name:'Pearl Bloom Pot',          category:'flowers', price:349, mrp:499, description:'Handcrafted chenille bloom in a decorative green pot with pearl accents.', featured:true,  cropX:null,cropY:null,cropW:null,cropH:null },
@@ -59,12 +56,11 @@ const DEFAULT_PRODUCTS = [
   { id:'TY-019', files:['Images/Toys (19).jpeg'],    name:'Animal Friends Set',       category:'toys', price:499, mrp:749, description:'A delightful set of chenille animal friends — premium gifting.',       featured:false, cropX:null,cropY:null,cropW:null,cropH:null },
 ];
 
-// ── 2. DATA LAYER ─────────────────────────────────────────────
+// ── 2. PRODUCTS DATA LAYER ────────────────────────────────────
 
 const STORAGE_KEY = 'craftyblooms_products_v2';
 
 function migrateProduct(p) {
-  // Convert old single `file` string to `files` array
   if (!p.files) p.files = p.file ? [p.file] : [];
   delete p.file;
   return p;
@@ -94,18 +90,230 @@ function resetProducts() {
 
 let products = loadProducts();
 
-// ── 3. STATE ──────────────────────────────────────────────────
+// ── 3. CART DATA LAYER ────────────────────────────────────────
+
+const CART_KEY   = 'craftyblooms_cart_v1';
+const ORDERS_KEY = 'craftyblooms_orders_v1';
+
+function loadCart() {
+  try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+  catch(e) { return []; }
+}
+
+function saveCart() {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
+function getCartCount() {
+  return cart.reduce((s, i) => s + i.qty, 0);
+}
+
+function getCartSubtotal() {
+  return cart.reduce((s, i) => s + i.price * i.qty, 0);
+}
+
+function addToCart(productId) {
+  const p = products.find(x => x.id === productId);
+  if (!p) return;
+  const existing = cart.find(i => i.id === productId);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ id: p.id, name: p.name, price: p.price, thumb: heroFile(p), qty: 1 });
+  }
+  saveCart();
+  updateCartBadge();
+  flashCartBtn(productId);
+  if (typeof showToast === 'function') showToast(`✓ Added to cart`);
+}
+
+function removeFromCart(productId) {
+  cart = cart.filter(i => i.id !== productId);
+  saveCart();
+  updateCartBadge();
+  renderCartItems();
+}
+
+function updateCartQty(productId, delta) {
+  const item = cart.find(i => i.id === productId);
+  if (!item) return;
+  item.qty = Math.max(1, item.qty + delta);
+  saveCart();
+  updateCartBadge();
+  renderCartItems();
+}
+
+function clearCart() {
+  cart = [];
+  saveCart();
+  updateCartBadge();
+  renderCartItems();
+}
+
+function updateCartBadge() {
+  const count = getCartCount();
+  const badge = document.getElementById('cart-badge');
+  if (!badge) return;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+  // animate
+  badge.classList.remove('cart-badge--pop');
+  void badge.offsetWidth;
+  if (count > 0) badge.classList.add('cart-badge--pop');
+  // mobile bar
+  updateMobileCartBar();
+}
+
+function updateMobileCartBar() {
+  const bar   = document.getElementById('mobile-cart-bar');
+  const label = document.getElementById('mobile-cart-label');
+  if (!bar) return;
+  const count = getCartCount();
+  const sub   = getCartSubtotal();
+  if (count > 0) {
+    label.textContent = `View Cart (${count} item${count > 1 ? 's' : ''}) — ₹${sub}`;
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function flashCartBtn(productId) {
+  const btn = document.querySelector(`.product-card__cta[data-id="${productId}"]`);
+  if (!btn) return;
+  btn.classList.add('cart-btn--added');
+  btn.textContent = '✓ Added';
+  setTimeout(() => {
+    btn.classList.remove('cart-btn--added');
+    btn.textContent = 'Add to Cart';
+  }, 1400);
+}
+
+let cart = loadCart();
+
+// ── 4. CART UI ────────────────────────────────────────────────
+
+function openCart() {
+  renderCartItems();
+  document.getElementById('cart-drawer').classList.add('open');
+  document.getElementById('cart-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+  document.getElementById('cart-drawer').classList.remove('open');
+  document.getElementById('cart-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function renderCartItems() {
+  const list    = document.getElementById('cart-items-list');
+  const footer  = document.getElementById('cart-footer');
+  const empty   = document.getElementById('cart-empty');
+  const subtotalEl = document.getElementById('cart-subtotal');
+  if (!list) return;
+
+  if (cart.length === 0) {
+    list.innerHTML  = '';
+    if (empty)  empty.style.display  = 'flex';
+    if (footer) footer.style.display = 'none';
+    return;
+  }
+  if (empty)  empty.style.display  = 'none';
+  if (footer) footer.style.display = 'flex';
+
+  list.innerHTML = cart.map(item => `
+    <div class="cart-item" data-id="${item.id}">
+      <div class="cart-item__img">
+        <img src="${item.thumb || PLACEHOLDER}" alt="${item.name}" onerror="this.src='${PLACEHOLDER}'">
+      </div>
+      <div class="cart-item__info">
+        <div class="cart-item__name">${item.name}</div>
+        <div class="cart-item__sku">${item.id}</div>
+        <div class="cart-item__price-row">
+          <div class="cart-item__stepper">
+            <button onclick="updateCartQty('${item.id}',-1)" aria-label="Decrease">−</button>
+            <span>${item.qty}</span>
+            <button onclick="updateCartQty('${item.id}',1)"  aria-label="Increase">+</button>
+          </div>
+          <span class="cart-item__line-total">₹${item.price * item.qty}</span>
+        </div>
+      </div>
+      <button class="cart-item__remove" onclick="removeFromCart('${item.id}')" aria-label="Remove">✕</button>
+    </div>`).join('');
+
+  if (subtotalEl) subtotalEl.textContent = `₹${getCartSubtotal()}`;
+}
+
+// ── 5. ORDER CHECKOUT (name form → WA) ───────────────────────
+
+function openOrderForm() {
+  if (cart.length === 0) { showToast('Your cart is empty!'); return; }
+  document.getElementById('order-name-input').value = '';
+  document.getElementById('order-note-input').value  = '';
+  document.getElementById('order-form-modal').style.display = 'flex';
+}
+
+function closeOrderForm() {
+  document.getElementById('order-form-modal').style.display = 'none';
+}
+
+function submitOrder() {
+  const name = document.getElementById('order-name-input').value.trim();
+  const note = document.getElementById('order-note-input').value.trim();
+  if (!name) { document.getElementById('order-name-input').focus(); return; }
+
+  // Build message
+  const lines = cart.map((item, i) =>
+    `${i + 1}. ${item.name} (${item.id}) × ${item.qty} — ₹${item.price * item.qty}`
+  );
+  const subtotal = getCartSubtotal();
+  let msg = `Hi! I'm ${name}.\nI'd like to order from Crafty Blooms:\n\n`;
+  msg += lines.join('\n');
+  msg += `\n\nSubtotal: ₹${subtotal}`;
+  if (note) msg += `\n\nNote: ${note}`;
+  msg += `\n\nPlease confirm availability and share payment details. Thank you!`;
+
+  // Log order to localStorage (admin will read this)
+  logOrder(name, note);
+
+  // Open WhatsApp
+  const url = `https://wa.me/917030261766?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank', 'noopener');
+
+  closeOrderForm();
+  closeCart();
+  if (typeof showToast === 'function') showToast('Order sent! We\'ll confirm on WhatsApp.');
+}
+
+function logOrder(customerName, note) {
+  try {
+    const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+    const id = 'ORD-' + Date.now();
+    orders.unshift({
+      id,
+      timestamp: new Date().toISOString(),
+      customerName,
+      items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
+      subtotal: getCartSubtotal(),
+      note: note || '',
+      status: 'pending'
+    });
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  } catch(e) { /* silent */ }
+}
+
+// ── 6. STATE ─────────────────────────────────────────────────
 
 let editMode     = false;
-let activeModal  = null; // 'crop' | 'editor' | 'quickview'
+let activeModal  = null; // 'crop' | 'editor' | 'quickview' | 'cart' | 'order'
 let activeFilter = 'all';
 let activeSearch = '';
 let activeSort   = 'default';
 
-// Slideshow timers keyed by product id
 const slideshowTimers = {};
 
-// ── 4. HELPERS ────────────────────────────────────────────────
+// ── 7. HELPERS ────────────────────────────────────────────────
 
 function getDiscountPct(p) {
   if (!p.mrp || p.mrp <= p.price) return 0;
@@ -127,7 +335,7 @@ function buildImageStyle(p) {
 
 const PLACEHOLDER = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect fill='%23f7f5f2' width='400' height='400'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%238a8a8a' font-size='14'>No Image</text></svg>`;
 
-// ── 5. CARD HTML ──────────────────────────────────────────────
+// ── 8. CARD HTML ──────────────────────────────────────────────
 
 function buildCardHTML(p) {
   const disc     = getDiscountPct(p);
@@ -135,7 +343,6 @@ function buildCardHTML(p) {
   const files    = p.files && p.files.length ? p.files : [''];
   const multi    = files.length > 1;
 
-  // Stack all images; first is visible, rest are opacity-0
   const imgSlides = files.map((src, i) => `
     <img class="card-slide${i === 0 ? ' card-slide--active' : ''}"
          src="${src || PLACEHOLDER}"
@@ -145,14 +352,10 @@ function buildCardHTML(p) {
          onerror="this.src='${PLACEHOLDER}'">`
   ).join('');
 
-  // Dot indicators (only when >1 image)
   const dots = multi ? `
     <div class="card-dots">
       ${files.map((_, i) => `<span class="card-dot${i === 0 ? ' card-dot--active' : ''}" data-idx="${i}"></span>`).join('')}
     </div>` : '';
-
-  // WhatsApp icon on card
-  const waLink = `https://wa.me/917030261766?text=${encodeURIComponent(`Hi! I'm interested in ${p.name} (SKU: ${p.id}) priced at ₹${p.price}. Please share availability.`)}`;
 
   return `
     <article class="product-card card-fade-in${p.featured ? ' product-card--featured' : ''}"
@@ -179,22 +382,22 @@ function buildCardHTML(p) {
           ${p.mrp && p.mrp > p.price ? `<span class="product-card__mrp">₹${p.mrp}</span>` : ''}
           <span class="product-card__price">₹${p.price}</span>
         </div>
-        <button class="product-card__cta" onclick="event.stopPropagation();openQuickView('${p.id}')">
-          ${p.files && p.files.length > 1 ? 'Choose options' : 'Quick View'}
+        <button class="product-card__cta" data-id="${p.id}"
+                onclick="event.stopPropagation();addToCart('${p.id}')">
+          Add to Cart
         </button>
         <div class="product-card__footer">
           <span class="product-card__sku">${p.id}</span>
-          <a class="card-wa-btn" href="${waLink}" target="_blank" rel="noopener"
-             onclick="event.stopPropagation()" title="Order on WhatsApp">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            Order
-          </a>
+          <button class="card-qv-btn" onclick="event.stopPropagation();openQuickView('${p.id}')" title="Quick View">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" width="13" height="13"><circle cx="10" cy="10" r="4"/><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/></svg>
+            View
+          </button>
         </div>
       </div>
     </article>`;
 }
 
-// ── 6. SLIDESHOW ──────────────────────────────────────────────
+// ── 9. SLIDESHOW ──────────────────────────────────────────────
 
 function startSlideshow(productId) {
   if (editMode) return;
@@ -222,7 +425,6 @@ function stopSlideshow(productId) {
   clearInterval(slideshowTimers[productId]);
   delete slideshowTimers[productId];
 
-  // Reset to first slide
   const wrap = document.querySelector(`.product-card__image-wrap[data-id="${productId}"]`);
   if (!wrap) return;
   const slides = wrap.querySelectorAll('.card-slide');
@@ -231,15 +433,11 @@ function stopSlideshow(productId) {
   dots.forEach((d, i)   => d.classList.toggle('card-dot--active',   i === 0));
 }
 
-// ── 7. RENDER ─────────────────────────────────────────────────
+// ── 10. RENDER ────────────────────────────────────────────────
 
 function getFilteredProducts() {
   let list = [...products];
-
-  // Category filter
   if (activeFilter !== 'all') list = list.filter(p => p.category === activeFilter);
-
-  // Search
   if (activeSearch.trim()) {
     const q = activeSearch.trim().toLowerCase();
     list = list.filter(p =>
@@ -248,11 +446,8 @@ function getFilteredProducts() {
       p.id.toLowerCase().includes(q)
     );
   }
-
-  // Sort
   if (activeSort === 'asc')  list.sort((a, b) => a.price - b.price);
   if (activeSort === 'desc') list.sort((a, b) => b.price - a.price);
-
   return list;
 }
 
@@ -269,11 +464,9 @@ function renderCatalog() {
   flowerGrid.innerHTML = flowers.map(buildCardHTML).join('');
   toysGrid.innerHTML   = toys.map(buildCardHTML).join('');
 
-  // Show/hide whole sections when filtered to 0
   flowerSection.style.display = flowers.length ? '' : 'none';
   toysSection.style.display   = toys.length   ? '' : 'none';
 
-  // Update filter-strip counts
   const flowerMin = flowers.length ? Math.min(...flowers.map(p => p.price)) : 0;
   const toysMin   = toys.length    ? Math.min(...toys.map(p => p.price))    : 0;
   document.getElementById('flowers-count').textContent = `${flowers.length} product${flowers.length !== 1 ? 's' : ''}`;
@@ -281,26 +474,22 @@ function renderCatalog() {
   document.getElementById('flowers-from').textContent  = flowers.length ? `from ₹${flowerMin}` : '';
   document.getElementById('toys-from').textContent     = toys.length    ? `from ₹${toysMin}`   : '';
 
-  // Results count in search bar
   const totalShown = flowers.length + toys.length;
   const resultEl   = document.getElementById('search-results-count');
   if (resultEl) resultEl.textContent = (activeSearch || activeFilter !== 'all') ? `${totalShown} result${totalShown !== 1 ? 's' : ''}` : '';
 
-  // Edit mode button — icon button, toggle .active class + tooltip only
   const editBtn = document.getElementById('edit-mode-btn');
   if (editBtn) {
     editBtn.classList.toggle('active', editMode);
     editBtn.title = editMode ? 'Exit Edit Mode (active)' : 'Edit Mode';
   }
-  // Add Product button
   const addBtn = document.getElementById('add-product-btn');
   if (addBtn) addBtn.style.display = editMode ? 'flex' : 'none';
 
-  // Trigger scroll animations
   initFadeIn();
 }
 
-// ── 8. EDIT MODE ─────────────────────────────────────────────
+// ── 11. EDIT MODE ─────────────────────────────────────────────
 
 function toggleEditMode() {
   editMode = !editMode;
@@ -308,7 +497,7 @@ function toggleEditMode() {
   renderCatalog();
 }
 
-// ── 9. SEARCH & FILTER ────────────────────────────────────────
+// ── 12. SEARCH & FILTER ───────────────────────────────────────
 
 function onSearchInput(e) {
   activeSearch = e.target.value;
@@ -338,14 +527,15 @@ function syncSearchUI() {
   if (sortEl) sortEl.value = activeSort;
 }
 
-// ── 10. QUICK VIEW MODAL ──────────────────────────────────────
+// ── 13. QUICK VIEW MODAL ──────────────────────────────────────
 
-let qvProductId  = null;
-let qvImageIndex = 0;
+let qvProductId   = null;
+let qvImageIndex  = 0;
+let qvAutoTimer   = null;
+const QV_INTERVAL = 2000;
 
 function onCardClick(e, productId) {
   if (editMode) return;
-  // Don't open if clicking a link or button inside the card
   if (e.target.closest('a, button')) return;
   openQuickView(productId);
 }
@@ -356,55 +546,68 @@ function openQuickView(productId) {
   qvProductId  = productId;
   qvImageIndex = 0;
 
-  const disc = getDiscountPct(p);
+  const disc  = getDiscountPct(p);
   const files = p.files && p.files.length ? p.files : [PLACEHOLDER];
+  const multi = files.length > 1;
 
-  const modal = document.getElementById('quickview-modal');
+  const imgEl = document.getElementById('qv-img');
+  imgEl.src = files[0] || PLACEHOLDER;
+  imgEl.alt = p.name;
 
-  // Main image
-  document.getElementById('qv-img').src = files[0] || PLACEHOLDER;
-  document.getElementById('qv-img').alt = p.name;
-
-  // Thumbnails
-  const thumbsEl = document.getElementById('qv-thumbs');
-  thumbsEl.innerHTML = files.map((src, i) => `
-    <button class="qv-thumb${i === 0 ? ' qv-thumb--active' : ''}" onclick="qvGoTo(${i})" type="button">
+  document.getElementById('qv-thumbs').innerHTML = files.map((src, i) => `
+    <button class="qv-thumb${i === 0 ? ' qv-thumb--active' : ''}"
+            onclick="qvGoTo(${i});qvStopAuto()" type="button">
       <img src="${src || PLACEHOLDER}" alt="${p.name} view ${i+1}">
     </button>`).join('');
 
-  // Counter
-  document.getElementById('qv-counter').textContent = files.length > 1 ? `1 / ${files.length}` : '';
+  document.getElementById('qv-counter').textContent = multi ? `1 / ${files.length}` : '';
+  document.getElementById('qv-prev').style.display  = multi ? '' : 'none';
+  document.getElementById('qv-next').style.display  = multi ? '' : 'none';
 
-  // Arrows
-  document.getElementById('qv-prev').style.display = files.length > 1 ? '' : 'none';
-  document.getElementById('qv-next').style.display = files.length > 1 ? '' : 'none';
+  const ppBtn = document.getElementById('qv-playpause');
+  if (ppBtn) ppBtn.style.display = multi ? 'flex' : 'none';
 
-  // Details
-  document.getElementById('qv-name').textContent   = p.name;
-  document.getElementById('qv-desc').textContent   = p.description || '';
-  document.getElementById('qv-sku').textContent    = p.id;
-  document.getElementById('qv-cat').textContent    = p.category === 'flowers' ? 'Pipe Cleaner Flowers' : 'Toys & Animals';
+  document.getElementById('qv-name').textContent = p.name;
+  document.getElementById('qv-desc').textContent = p.description || '';
+  document.getElementById('qv-sku').textContent  = p.id;
+  document.getElementById('qv-cat').textContent  = p.category === 'flowers' ? 'Pipe Cleaner Flowers' : 'Toys & Animals';
 
-  const priceRow = document.getElementById('qv-price-row');
-  priceRow.innerHTML = `
+  document.getElementById('qv-price-row').innerHTML = `
     ${p.mrp && p.mrp > p.price ? `<span class="qv-mrp">₹${p.mrp}</span>` : ''}
     <span class="qv-price">₹${p.price}</span>
     ${disc > 0 ? `<span class="badge badge--discount" style="position:static;font-size:10px;">${disc}% OFF</span>` : ''}`;
 
-  // WhatsApp link
-  const waText = encodeURIComponent(`Hi! I'm interested in ${p.name} (SKU: ${p.id}) priced at ₹${p.price}. Please share availability.`);
-  document.getElementById('qv-wa-btn').href = `https://wa.me/917030261766?text=${waText}`;
-
-  modal.style.display = 'flex';
+  document.getElementById('quickview-modal').style.display = 'flex';
   activeModal = 'quickview';
   document.body.style.overflow = 'hidden';
+
+  qvStopAuto();
+  if (multi) qvStartAuto();
 }
 
 function closeQuickView() {
+  qvStopAuto();
   document.getElementById('quickview-modal').style.display = 'none';
   activeModal = null;
   document.body.style.overflow = '';
   qvProductId = null;
+}
+
+function qvStartAuto() {
+  qvStopAuto();
+  const ppBtn = document.getElementById('qv-playpause');
+  if (ppBtn) { ppBtn.innerHTML = '⏸'; ppBtn.title = 'Pause'; }
+  qvAutoTimer = setInterval(() => qvGoTo(qvImageIndex + 1), QV_INTERVAL);
+}
+
+function qvStopAuto() {
+  if (qvAutoTimer) { clearInterval(qvAutoTimer); qvAutoTimer = null; }
+  const ppBtn = document.getElementById('qv-playpause');
+  if (ppBtn) { ppBtn.innerHTML = '▶'; ppBtn.title = 'Play'; }
+}
+
+function qvToggleAuto() {
+  qvAutoTimer ? qvStopAuto() : qvStartAuto();
 }
 
 function qvGoTo(idx) {
@@ -412,20 +615,29 @@ function qvGoTo(idx) {
   if (!p) return;
   const files = p.files && p.files.length ? p.files : [PLACEHOLDER];
   qvImageIndex = (idx + files.length) % files.length;
+
   const img = document.getElementById('qv-img');
   img.classList.add('qv-img--fade');
   setTimeout(() => {
     img.src = files[qvImageIndex] || PLACEHOLDER;
     img.classList.remove('qv-img--fade');
   }, 140);
+
   document.getElementById('qv-counter').textContent = files.length > 1 ? `${qvImageIndex + 1} / ${files.length}` : '';
   document.querySelectorAll('.qv-thumb').forEach((el, i) => el.classList.toggle('qv-thumb--active', i === qvImageIndex));
 }
 
-function qvPrev() { qvGoTo(qvImageIndex - 1); }
-function qvNext() { qvGoTo(qvImageIndex + 1); }
+function qvPrev() { qvStopAuto(); qvGoTo(qvImageIndex - 1); }
+function qvNext() { qvStopAuto(); qvGoTo(qvImageIndex + 1); }
 
-// ── 11. SCROLL FADE-IN (IntersectionObserver) ─────────────────
+function qvAddToCart() {
+  if (qvProductId) {
+    addToCart(qvProductId);
+    closeQuickView();
+  }
+}
+
+// ── 14. SCROLL FADE-IN ────────────────────────────────────────
 
 function initFadeIn() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -439,24 +651,22 @@ function initFadeIn() {
   }, { threshold: 0.08 });
 
   document.querySelectorAll('.card-fade-in:not(.card-fade-in--visible)').forEach((el, i) => {
-    // Stagger within groups of 3
     el.style.transitionDelay = `${(i % 3) * 80}ms`;
     obs.observe(el);
   });
 }
 
-// ── 12. IMAGE ZOOM (magnifier lens) ───────────────────────────
+// ── 15. IMAGE ZOOM ────────────────────────────────────────────
 
 let magnifier = null;
 
 function initMagnifier() {
-  if (window.innerWidth < 900) return; // desktop only
+  if (window.innerWidth < 900) return;
 
   magnifier = document.createElement('div');
   magnifier.id = 'img-magnifier';
   document.body.appendChild(magnifier);
 
-  // Use event delegation on catalog main
   const main = document.getElementById('catalog-main');
   main.addEventListener('mousemove', onMagnifierMove);
   main.addEventListener('mouseleave', hideMagnifier);
@@ -477,34 +687,27 @@ function onMagnifierMove(e) {
   const lensW  = 160;
   const lensH  = 160;
 
-  // Position the magnifier lens relative to viewport
   const lensX = e.clientX + 18;
   const lensY = e.clientY - lensH / 2;
 
   magnifier.style.cssText = `
-    display:block;
-    position:fixed;
+    display:block;position:fixed;
     left:${Math.min(lensX, window.innerWidth - lensW - 8)}px;
     top:${Math.max(8, Math.min(lensY, window.innerHeight - lensH - 8))}px;
-    width:${lensW}px;
-    height:${lensH}px;
-    border-radius:50%;
+    width:${lensW}px;height:${lensH}px;border-radius:50%;
     border:2px solid rgba(255,255,255,0.9);
     box-shadow:0 4px 24px rgba(0,0,0,0.22);
     background-image:url('${activeSlide.src}');
     background-size:${zoom * 100}%;
     background-position:${xPct}% ${yPct}%;
-    background-repeat:no-repeat;
-    pointer-events:none;
-    z-index:500;
-    overflow:hidden;`;
+    background-repeat:no-repeat;pointer-events:none;z-index:500;overflow:hidden;`;
 }
 
 function hideMagnifier() {
   if (magnifier) magnifier.style.display = 'none';
 }
 
-// ── 13. CROP MODAL ────────────────────────────────────────────
+// ── 16. CROP MODAL ────────────────────────────────────────────
 
 let cropProduct = null;
 let cropBox     = { x:10, y:10, w:80, h:80 };
@@ -608,7 +811,7 @@ function handleCropImageUpload(e) {
   reader.readAsDataURL(file);
 }
 
-// ── 14. PRODUCT EDITOR DRAWER ─────────────────────────────────
+// ── 17. PRODUCT EDITOR DRAWER ─────────────────────────────────
 
 let editingProductId = null;
 
@@ -627,7 +830,6 @@ function openProductEditor(productId) {
   document.getElementById('editor-featured').checked     = p ? !!p.featured   : false;
   document.getElementById('editor-delete-btn').style.display = p ? 'inline-flex' : 'none';
 
-  // Build multi-image list
   renderEditorImageList(p ? p.files : []);
 
   document.getElementById('editor-drawer').classList.add('open');
@@ -738,7 +940,7 @@ function deleteProduct(productId) {
   if(typeof showToast==='function') showToast('Product deleted');
 }
 
-// ── 15. PDF EXPORT ────────────────────────────────────────────
+// ── 18. PDF EXPORT ────────────────────────────────────────────
 
 async function exportPDF() {
   const btn=document.getElementById('pdf-btn');
@@ -790,7 +992,7 @@ async function exportPDF() {
     alert('PDF export failed.\n'+err.message); console.error(err);
   } finally {
     editMode=wasEditMode; renderCatalog();
-    btn.disabled=false; btn.textContent='⬇ Download PDF';
+    btn.disabled=false; btn.textContent='⬇ Catalog PDF';
   }
 }
 
@@ -800,7 +1002,7 @@ function chunkArray(arr,size){const out=[];for(let i=0;i<arr.length;i+=size)out.
 function buildCoverElement(){
   const featured=products.filter(p=>p.featured).slice(0,4);
   const el=document.createElement('div');
-  el.style.cssText=`position:fixed;left:-9999px;top:0;width:794px;height:1123px;background:#fff;font-family:'Poppins',sans-serif;overflow:hidden;box-sizing:border-box;padding:60px 56px;`;
+  el.style.cssText=`position:fixed;left:-9999px;top:0;width:794px;height:1123px;background:#fff;font-family:'Jost',sans-serif;overflow:hidden;box-sizing:border-box;padding:60px 56px;`;
   el.innerHTML=`
     <div style="border-bottom:1px solid #dcdcdc;padding-bottom:20px;margin-bottom:32px;">
       <div style="font-size:44px;font-weight:700;letter-spacing:-1px;color:#1a1a1a;line-height:1;">crafty blooms</div>
@@ -829,14 +1031,14 @@ function buildCoverElement(){
 
 function buildSectionDividerElement(label,count){
   const el=document.createElement('div');
-  el.style.cssText=`position:fixed;left:-9999px;top:0;width:794px;height:1123px;background:#f7f5f2;font-family:'Poppins',sans-serif;overflow:hidden;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;`;
+  el.style.cssText=`position:fixed;left:-9999px;top:0;width:794px;height:1123px;background:#f7f5f2;font-family:'Jost',sans-serif;overflow:hidden;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;`;
   el.innerHTML=`<div style="font-size:10px;letter-spacing:3px;color:#8a8a8a;text-transform:uppercase;margin-bottom:16px;">crafty blooms</div><div style="font-size:42px;font-weight:700;color:#1a1a1a;text-align:center;line-height:1.15;">${label}</div><div style="width:48px;height:2px;background:#c8102e;margin:20px auto;"></div><div style="font-size:13px;color:#4a4a4a;">${count} handcrafted products</div>`;
   return el;
 }
 
 function buildGridPageElement(items,sectionLabel){
   const el=document.createElement('div');
-  el.style.cssText=`position:fixed;left:-9999px;top:0;width:794px;height:1123px;background:#fff;font-family:'Poppins',sans-serif;overflow:hidden;box-sizing:border-box;padding:32px 36px;`;
+  el.style.cssText=`position:fixed;left:-9999px;top:0;width:794px;height:1123px;background:#fff;font-family:'Jost',sans-serif;overflow:hidden;box-sizing:border-box;padding:32px 36px;`;
   const cards=items.map(p=>{
     const disc=getDiscountPct(p);
     return `<div style="display:flex;flex-direction:column;background:#fff;border:1px solid #dcdcdc;">
@@ -865,16 +1067,17 @@ function buildGridPageElement(items,sectionLabel){
 
 function buildBackCoverElement(){
   const el=document.createElement('div');
-  el.style.cssText=`position:fixed;left:-9999px;top:0;width:794px;height:1123px;background:#1a1a1a;font-family:'Poppins',sans-serif;overflow:hidden;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;`;
+  el.style.cssText=`position:fixed;left:-9999px;top:0;width:794px;height:1123px;background:#1a1a1a;font-family:'Jost',sans-serif;overflow:hidden;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;`;
   el.innerHTML=`<div style="font-size:42px;font-weight:700;letter-spacing:-1px;margin-bottom:8px;">crafty blooms</div><div style="font-size:10px;letter-spacing:4px;color:#8a8a8a;text-transform:uppercase;margin-bottom:48px;">handcrafted with love</div><div style="width:48px;height:2px;background:#c8102e;margin-bottom:48px;"></div><div style="display:flex;gap:60px;margin-bottom:48px;"><div style="text-align:center;"><div style="font-size:9px;letter-spacing:2px;color:#8a8a8a;text-transform:uppercase;margin-bottom:6px;">WhatsApp</div><div style="font-size:15px;font-weight:500;">+91-7030261766</div></div><div style="width:1px;background:#333;"></div><div style="text-align:center;"><div style="font-size:9px;letter-spacing:2px;color:#8a8a8a;text-transform:uppercase;margin-bottom:6px;">Instagram</div><div style="font-size:15px;font-weight:500;">@craftyblooms</div></div></div><div style="font-size:11px;color:#4a4a4a;text-align:center;line-height:2;max-width:360px;">Custom orders welcome · Bulk pricing available<br>Flowers · Toys · Décor · Gifting</div>`;
   return el;
 }
 
-// ── 16. EVENT WIRING ──────────────────────────────────────────
+// ── 19. EVENT WIRING ──────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
   renderCatalog();
   initMagnifier();
+  updateCartBadge();
 
   // Crop modal drag
   const container=document.getElementById('crop-container');
@@ -892,6 +1095,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('crop-modal').addEventListener('click', e => { if(e.target.id==='crop-modal') closeCropModal(); });
   document.getElementById('quickview-modal').addEventListener('click', e => { if(e.target.id==='quickview-modal') closeQuickView(); });
   document.getElementById('editor-overlay').addEventListener('click', closeProductEditor);
+  document.getElementById('cart-overlay').addEventListener('click', closeCart);
+  document.getElementById('order-form-modal').addEventListener('click', e => { if(e.target.id==='order-form-modal') closeOrderForm(); });
 
   // Keyboard nav
   document.addEventListener('keydown', e => {
@@ -899,6 +1104,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if(activeModal==='crop')      closeCropModal();
       if(activeModal==='editor')    closeProductEditor();
       if(activeModal==='quickview') closeQuickView();
+      if(activeModal==='cart')      closeCart();
+      if(activeModal==='order')     closeOrderForm();
     }
     if(activeModal==='quickview'){
       if(e.key==='ArrowLeft')  qvPrev();
@@ -906,9 +1113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Drawer overlay wiring
-  const drawer=document.getElementById('editor-drawer');
-  const overlay=document.getElementById('editor-overlay');
-  new MutationObserver(()=>{ overlay.style.display=drawer.classList.contains('open')?'block':'none'; })
-    .observe(drawer,{attributes:true,attributeFilter:['class']});
+  // Order form — Enter key on name field
+  const nameInput = document.getElementById('order-name-input');
+  if (nameInput) nameInput.addEventListener('keydown', e => { if(e.key==='Enter') submitOrder(); });
 });

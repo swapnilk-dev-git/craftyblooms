@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crafty Blooms — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ══ PIN LOCK SCREEN ═══════════════════════════════════════ -->
+<div id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-brand">crafty blooms</div>
+    <div class="lock-tagline">admin dashboard</div>
+    <div class="lock-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0110 0v4"/>
+      </svg>
+    </div>
+    <div class="form-group">
+      <label for="pin-input">Enter PIN</label>
+      <input type="password" id="pin-input" placeholder="••••" maxlength="6" autocomplete="current-password">
+    </div>
+    <div class="lock-error" id="lock-error" style="display:none;">Incorrect PIN. Try again.</div>
+    <button class="lock-btn" onclick="checkPin()">Unlock Dashboard</button>
+    <a href="index.html" class="lock-back">← Back to Store</a>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══════════════════════════════════════════════ -->
+<div id="dashboard" style="display:none;">
+
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="admin-header__inner">
+      <div class="admin-brand">
+        <span class="admin-brand__name">crafty blooms</span>
+        <span class="admin-brand__tag">Order Dashboard</span>
+      </div>
+      <div class="admin-header__actions">
+        <a href="index.html" class="adm-btn adm-btn--ghost">← Store</a>
+        <button class="adm-btn adm-btn--ghost" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="adm-btn adm-btn--danger" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats row -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card">
+      <div class="stat-card__value" id="stat-total">0</div>
+      <div class="stat-card__label">Total Orders</div>
+    </div>
+    <div class="stat-card stat-card--pending">
+      <div class="stat-card__value" id="stat-pending">0</div>
+      <div class="stat-card__label">Pending</div>
+    </div>
+    <div class="stat-card stat-card--accepted">
+      <div class="stat-card__value" id="stat-accepted">0</div>
+      <div class="stat-card__label">Accepted</div>
+    </div>
+    <div class="stat-card stat-card--rejected">
+      <div class="stat-card__value" id="stat-rejected">0</div>
+      <div class="stat-card__label">Rejected</div>
+    </div>
+    <div class="stat-card stat-card--revenue">
+      <div class="stat-card__value" id="stat-revenue">₹0</div>
+      <div class="stat-card__label">Accepted Revenue</div>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="filter-bar__inner">
+      <div class="status-pills">
+        <button class="spill spill--active" data-status="all"      onclick="setStatusFilter('all')">All</button>
+        <button class="spill"               data-status="pending"  onclick="setStatusFilter('pending')">⏳ Pending</button>
+        <button class="spill"               data-status="accepted" onclick="setStatusFilter('accepted')">✅ Accepted</button>
+        <button class="spill"               data-status="rejected" onclick="setStatusFilter('rejected')">❌ Rejected</button>
+      </div>
+      <button class="adm-btn adm-btn--danger-outline" onclick="confirmClearAll()">Clear All Orders</button>
+    </div>
+  </div>
+
+  <!-- Orders list -->
+  <main class="orders-main">
+    <div id="orders-empty" class="orders-empty" style="display:none;">
+      <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.2" width="48" height="48" opacity="0.25"><rect x="10" y="6" width="40" height="48" rx="3"/><path d="M18 18h24M18 26h24M18 34h16"/></svg>
+      <p>No orders yet</p>
+      <span>Orders placed from the store will appear here.</span>
+    </div>
+    <div id="orders-list" class="orders-list"></div>
+  </main>
+
+</div>
+
+<!-- ══ NOTE MODAL ════════════════════════════════════════════ -->
+<div id="note-modal" class="note-modal-backdrop" style="display:none;">
+  <div class="note-modal">
+    <div class="note-modal__header">
+      <h2>Add / Edit Note</h2>
+      <button class="adm-icon-btn" onclick="closeNoteModal()">✕</button>
+    </div>
+    <div class="note-modal__body">
+      <textarea id="note-textarea" rows="4" placeholder="Internal note about this order…"></textarea>
+    </div>
+    <div class="note-modal__actions">
+      <button class="adm-btn adm-btn--ghost" onclick="closeNoteModal()">Cancel</button>
+      <button class="adm-btn adm-btn--primary" onclick="saveNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<div class="adm-toast" id="adm-toast"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>
