@@ -120,6 +120,12 @@ textarea { resize: vertical; }
   font-size: 12px; padding: 7px 14px;
 }
 .adm-btn--danger-outline:hover { background: var(--red-bg); }
+.adm-btn--edit {
+  background: rgba(255,255,255,0.15); color: #fff;
+  border: 1px solid rgba(255,255,255,0.35);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.adm-btn--edit:hover { background: rgba(255,255,255,0.28); }
 .adm-icon-btn {
   width: 30px; height: 30px; background: var(--bg-soft); border-radius: 50%;
   font-size: 14px; color: var(--ink-500); cursor: pointer; border: none;

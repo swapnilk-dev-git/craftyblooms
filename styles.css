@@ -112,9 +112,19 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
   outline: 2px solid rgba(200,16,46,0.22);
   outline-offset: 1px;
 }
+
+/* Exit Edit Mode button — ✕ in red when edit mode is on */
+.exit-edit-btn {
+  color: var(--red) !important;
+  background: rgba(200,16,46,0.08) !important;
+  outline: 2px solid rgba(200,16,46,0.22);
+  outline-offset: 1px;
+}
+.exit-edit-btn:hover { background: rgba(200,16,46,0.16) !important; }
+
 /* Edit mode banner — shows when edit mode is ON */
 body.edit-mode-on::after {
-  content: '✏  Edit Mode ON — hover cards to edit';
+  content: '✏  Edit Mode ON — hover cards to edit · click ✕ to exit';
   position: fixed;
   bottom: 16px;
   left: 50%;
@@ -126,7 +136,7 @@ body.edit-mode-on::after {
   font-weight: 500;
   padding: 8px 20px;
   border-radius: 20px;
-  z-index: 2000;
+  z-index: 800;
   pointer-events: none;
   white-space: nowrap;
   box-shadow: 0 4px 16px rgba(200,16,46,0.3);

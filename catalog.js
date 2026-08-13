@@ -531,20 +531,43 @@ function renderCatalog() {
 
   const editBtn = document.getElementById('edit-mode-btn');
   if (editBtn) {
+    // Only show if admin is authed
+    editBtn.style.display = isAdminAuthed() ? '' : 'none';
     editBtn.classList.toggle('active', editMode);
-    editBtn.title = editMode ? 'Exit Edit Mode (active)' : 'Edit Mode';
+    editBtn.title = editMode ? 'Edit Mode (active)' : 'Edit Mode';
   }
   const addBtn = document.getElementById('add-product-btn');
-  if (addBtn) addBtn.style.display = editMode ? 'flex' : 'none';
+  if (addBtn) addBtn.style.display = (isAdminAuthed() && editMode) ? 'flex' : 'none';
 
   initFadeIn();
 }
 
 // ── 11. EDIT MODE ─────────────────────────────────────────────
 
+// ── AUTH GATE ─────────────────────────────────────────────────
+// Edit mode only available after authenticating via admin.html
+// (which sets localStorage key cb_admin_auth_v1 = '1').
+
+const ADMIN_AUTH_KEY = 'cb_admin_auth_v1';
+
+function isAdminAuthed() {
+  return localStorage.getItem(ADMIN_AUTH_KEY) === '1';
+}
+
 function toggleEditMode() {
+  if (!isAdminAuthed()) return; // no-op for regular visitors
   editMode = !editMode;
   document.body.classList.toggle('edit-mode-on', editMode);
+  const exitBtn = document.getElementById('exit-edit-btn');
+  if (exitBtn) exitBtn.style.display = editMode ? 'inline-flex' : 'none';
+  renderCatalog();
+}
+
+function exitEditMode() {
+  editMode = false;
+  document.body.classList.remove('edit-mode-on');
+  const exitBtn = document.getElementById('exit-edit-btn');
+  if (exitBtn) exitBtn.style.display = 'none';
   renderCatalog();
 }
 
@@ -1126,6 +1149,19 @@ function buildBackCoverElement(){
 // ── 19. EVENT WIRING ──────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Show edit button only for authed admin
+  const editBtn = document.getElementById('edit-mode-btn');
+  if (editBtn) editBtn.style.display = isAdminAuthed() ? '' : 'none';
+
+  // Auto-enter edit mode when arriving from admin.html with ?edit=1
+  if (isAdminAuthed() && new URLSearchParams(window.location.search).get('edit') === '1') {
+    editMode = true;
+    document.body.classList.add('edit-mode-on');
+    const exitBtn = document.getElementById('exit-edit-btn');
+    if (exitBtn) exitBtn.style.display = 'inline-flex';
+    history.replaceState(null, '', window.location.pathname);
+  }
+
   renderCatalog();
   initMagnifier();
   updateCartBadge();
